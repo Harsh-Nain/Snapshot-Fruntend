@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import { OnTime } from "../components/agotime";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
+import { API_URL } from "../config/api";
 
 export default function Messages() {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -29,7 +30,7 @@ export default function Messages() {
   useEffect(() => {
     if (!user) return;
 
-    socketRef.current = io("https://snapshot-backend0-2.onrender.com", {
+    socketRef.current = io(API_URL, {
       auth: { userId: String(currentId) },
       withCredentials: true,
       transports: ["websocket"],
@@ -98,7 +99,7 @@ export default function Messages() {
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
-      const res = await fetch("https://snapshot-backend0-2.onrender.com/api/message/message", {
+      const res = await fetch(`${API_URL}/api/message/message`, {
         credentials: "include",
       });
 
@@ -130,7 +131,7 @@ export default function Messages() {
 
 
   const userlist = async () => {
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/message/userlist", {
+    const res = await fetch(`${API_URL}/api/message/userlist`, {
       credentials: "include",
     });
 
@@ -172,7 +173,7 @@ export default function Messages() {
     });
 
     const res = await fetch(
-      "https://snapshot-backend0-2.onrender.com/api/message/saveMessage",
+      `${API_URL}/api/message/saveMessage`,
       {
         method: "POST",
         credentials: "include",
@@ -221,7 +222,7 @@ export default function Messages() {
     setopenChatId(Id);
 
     const res = await fetch(
-      `https://snapshot-backend0-2.onrender.com/api/message/showMessage?Id=${Id}`,
+      `${API_URL}/api/message/showMessage?Id=${Id}`,
       { method: "POST", credentials: "include" }
     );
 
@@ -260,7 +261,7 @@ export default function Messages() {
   }
 
   async function handleDeleteMessage(Id) {
-    const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/message/unSend?messid=${Id}`, {
+    const res = await fetch(`${API_URL}/api/message/unSend?messid=${Id}`, {
       method: "delete",
       credentials: "include"
     });

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import DotSpinner from "../components/dot-spinner-anim";
+import { API_URL } from "../config/api";
 
 export default function EditPost() {
 
@@ -115,7 +116,7 @@ export default function EditPost() {
 
     setLoading(true);
 
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/editPost", {
+    const res = await fetch(`${API_URL}/api/post/editPost`, {
       method: "POST",
       credentials: "include",
       body: formData,

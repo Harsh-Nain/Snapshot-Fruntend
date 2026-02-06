@@ -1,6 +1,7 @@
 import { React, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
+import { API_URL } from "../config/api";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -8,7 +9,7 @@ export default function Login() {
 
     const onSubmit = async (formData) => {
         try {
-            const res = await fetch("https://snapshot-backend0-2.onrender.com/api/auth/login", {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

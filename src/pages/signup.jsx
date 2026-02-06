@@ -1,10 +1,32 @@
 import { NavLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { API_URL } from "../config/api";
 
 export default function Signup() {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    
-    const onSubmit = (data) => { console.log("Form Data:", data); };
+    const onSubmit = async (formData) => {
+        try {
+            const res = await fetch(`${API_URL}/api/auth/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+            console.log("Signup response:", data);
+
+            if (!res.ok) {
+                throw new Error(data.message || "Login failed");
+            }
+
+            navigate("/api/auth/login");
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-100 w-full">

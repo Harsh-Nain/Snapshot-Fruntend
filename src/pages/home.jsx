@@ -4,8 +4,10 @@ import { TimeAgo } from "../components/agotime";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
+import { API_URL } from "../config/api";
 
 export default function Home() {
+
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [user, setUser] = useState();
@@ -25,7 +27,7 @@ export default function Home() {
 
     useEffect(() => {
         const loadDashboard = async () => {
-            const res = await fetch("https://snapshot-backend0-2.onrender.com/", {
+            const res = await fetch(API_URL, {
                 credentials: "include",
             });
 
@@ -59,7 +61,7 @@ export default function Home() {
 
     const handleLike = async (Id) => {
         setLikeing(true)
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/like", {
+        const res = await fetch(`${API_URL}/api/post/like`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -95,7 +97,7 @@ export default function Home() {
         setCommenting(true);
         setCommentsPostId(postId)
 
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/postcomment", {
+        const res = await fetch(`${API_URL}/api/post/postcomment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -114,7 +116,7 @@ export default function Home() {
 
     const handleSubmitComment = async (d) => {
 
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/CreateComment", {
+        const res = await fetch(`${API_URL}/api/post/CreateComment`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -167,7 +169,7 @@ export default function Home() {
         loadingRef.current = true;
         setloading(true);
 
-        const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/post/posts?page=${page}`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/api/post/posts?page=${page}`, { credentials: "include" });
 
         const data = await res.json();
 

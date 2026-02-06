@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DotSpinner from "../components/dot-spinner-anim";
+import { API_URL } from "../config/api";
 
 export default function CreatePost() {
   const [image, setImage] = useState(null);
@@ -77,7 +78,7 @@ export default function CreatePost() {
     try {
       setLoading(true);
 
-      const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/post", {
+      const res = await fetch(`${API_URL}/api/post/post`, {
         method: "POST",
         credentials: "include",
         body: formData,

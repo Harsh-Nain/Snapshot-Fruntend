@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import DotSpinner from "../components/dot-spinner-anim";
 import { useForm } from "react-hook-form";
 import { TimeAgo } from "../components/agotime";
+import { API_URL } from "../config/api";
 
 export default function OtherUser() {
     const [searchParams] = useSearchParams();
@@ -78,7 +79,7 @@ export default function OtherUser() {
 
     const handleSubmitComment = async (d) => {
 
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/CreateComment", {
+        const res = await fetch(`${API_URL}/api/post/CreateComment`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -107,7 +108,7 @@ export default function OtherUser() {
 
     const handleLike = async (Id) => {
         setLikeing(true)
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/like", {
+        const res = await fetch(`${API_URL}/api/post/like`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -126,14 +127,14 @@ export default function OtherUser() {
 
     const showImage = async (postId) => {
         setPostloading(true)
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/onePost", {
+        const res = await fetch(`${API_URL}/api/post/onePost`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ postId }),
         });
 
-        const com = await fetch("https://snapshot-backend0-2.onrender.com/api/post/postcomment", {
+        const com = await fetch(`${API_URL}/api/post/postcomment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -153,7 +154,7 @@ export default function OtherUser() {
 
         setfollowLoading(true)
 
-        const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/follow/request`, {
+        const res = await fetch(`${API_URL}/api/follow/request`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -172,7 +173,7 @@ export default function OtherUser() {
     const unfollow = async (requestId) => {
         setfollowLoading(true)
 
-        const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/follow/unfollow`, {
+        const res = await fetch(`${API_URL}/api/follow/unfollow`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -196,7 +197,7 @@ export default function OtherUser() {
             setisunfollow(false)
         }
 
-        const res = await fetch("https://snapshot-backend0-2.onrender.com/api/follow/getfollowData", {
+        const res = await fetch(`${API_URL}/api/follow/getfollowData`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -220,7 +221,7 @@ export default function OtherUser() {
 
     const addMessage = async (toMessId) => {
 
-        const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/message/message?toMessId=${toMessId}`, {
+        const res = await fetch(`${API_URL}/api/message/message?toMessId=${toMessId}`, {
             credentials: "include",
         });
 

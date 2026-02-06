@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
+import { API_URL } from "../config/api";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function Profile() {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [Post, setPost] = useState();
+  const [ConfirmDlt, setConfirmDlt] = useState();
   const [PostOption, setPostOption] = useState(false);
   const [Postloading, setPostloading] = useState(true);
   const [Comments, setComments] = useState([]);
@@ -57,7 +59,7 @@ export default function Profile() {
 
   useEffect(() => {
     const loadProfile = async () => {
-      const res = await fetch("https://snapshot-backend0-2.onrender.com/api/profile", {
+      const res = await fetch(`${API_URL}/api/profile`, {
         credentials: "include",
       });
 
@@ -79,14 +81,14 @@ export default function Profile() {
 
   const showImage = async (postId) => {
     setPostloading(true)
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/onePost", {
+    const res = await fetch(`${API_URL}/api/post/onePost`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ postId }),
     });
 
-    const com = await fetch("https://snapshot-backend0-2.onrender.com/api/post/postcomment", {
+    const com = await fetch(`${API_URL}/api/post/postcomment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -103,7 +105,7 @@ export default function Profile() {
 
   const handleLike = async (Id) => {
     setLikeing(true)
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/like", {
+    const res = await fetch(`${API_URL}/api/post/like`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -132,7 +134,7 @@ export default function Profile() {
       fd.append("image", formData.image);
     }
 
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/auth/updateUser", {
+    const res = await fetch(`${API_URL}/api/auth/updateUser`, {
       method: "POST",
       credentials: "include",
       body: fd,
@@ -151,7 +153,7 @@ export default function Profile() {
 
   const handleSubmitComment = async (d) => {
 
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/CreateComment", {
+    const res = await fetch(`${API_URL}/api/post/CreateComment`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -184,7 +186,7 @@ export default function Profile() {
 
   const remove = async (requestId, path) => {
 
-    const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/follow/${path}`, {
+    const res = await fetch(`${API_URL}/api/follow/${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -209,10 +211,10 @@ export default function Profile() {
 
   }
 
-  const DltPost = async () => {
+  async function handleDelet() {
     setPostOption(!PostOption)
     setPost(!Post)
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/post/delete", {
+    const res = await fetch(`${API_URL}/api/post/delete`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -234,6 +236,7 @@ export default function Profile() {
     setPostloading(false);
     setPostOption(false);
     setComments([]);
+    setConfirmDlt(false)
     setCommentsPostId(null);
     setPostloading(!Postloading)
   }
@@ -246,7 +249,7 @@ export default function Profile() {
       setisunfollow(false)
     }
 
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/follow/getfollowData", {
+    const res = await fetch(`${API_URL}/api/follow/getfollowData`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -268,7 +271,7 @@ export default function Profile() {
 
   const addMessage = async (toMessId) => {
 
-    const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/message/message?toMessId=${toMessId}`, {
+    const res = await fetch(`${API_URL}/api/message/message?toMessId=${toMessId}`, {
       credentials: "include",
     });
 
@@ -280,7 +283,7 @@ export default function Profile() {
 
   const follow = async (requestId, path) => {
 
-    const res = await fetch(`https://snapshot-backend0-2.onrender.com/api/follow/request`, {
+    const res = await fetch(`${API_URL}/api/follow/request`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -309,7 +312,7 @@ export default function Profile() {
   }
 
   const Logout = async () => {
-    const res = await fetch("https://snapshot-backend0-2.onrender.com/api/logout", {
+    const res = await fetch(`${API_URL}/api/logout`, {
       method: "GET",
       credentials: "include",
     });
@@ -322,6 +325,16 @@ export default function Profile() {
     <main className="flex-1 flex justify-center px-2 overflow-y-auto h-screen">
       <button onClick={() => Logout()} className="fixed right-1 top-2 text-2xl text-black a font-semibold">📤
       </button>
+      {ConfirmDlt && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90">
+        <div className="w-[300px] bg-white p-5 rounded-xl flex justify-center items-center flex-col">
+          <p>Confirm to Delete Post</p>
+          <div className="flex justify-centet items-center gap-3">
+            <button className="text-white px-2 py-1 rounded-xl bg-blue-300 cursor-pointer border-black border-1 hover:bg-blue-400 hover:text-black" onClick={() => setConfirmDlt(false)}>Cancel</button>
+            <button className="text-white px-2 py-1 rounded-lg bg-red-300 cursor-pointer border-black border-1 hover:bg-red-400 hover:text-black" onClick={() => handleDelet()}>Delete</button>
+          </div>
+        </div>
+      </div>}
+
       {loading && <div className="fixed b-0 md:inset-0 h-[100vh] w-[100vw] bg-black/40 flex justify-center items-center z-90"><DotSpinner size="3.5rem" color="#000000" /></div>}
       <div className="w-[100vw] max-w-5xl bg-white rounded-xl md:px-4 py-4 flex flex-col gap-6">
 
