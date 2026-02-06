@@ -1,4 +1,3 @@
-import { React, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import { API_URL } from "../config/api";
