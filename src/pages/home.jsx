@@ -28,6 +28,7 @@ export default function Home() {
     useEffect(() => {
         const loadDashboard = async () => {
             const res = await fetch(API_URL, {
+                method: "GET",
                 credentials: "include",
             });
 
@@ -169,7 +170,7 @@ export default function Home() {
         loadingRef.current = true;
         setloading(true);
 
-        const res = await fetch(`${API_URL}/api/post/posts?page=${page}`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/api/post/posts?page=${page}`, {  method: "GET",credentials: "include" });
 
         const data = await res.json();
 
