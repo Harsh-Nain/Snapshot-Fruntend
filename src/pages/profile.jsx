@@ -6,6 +6,8 @@ import DotSpinner from "../components/dot-spinner-anim";
 
 export default function Profile() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL
+  console.log(API_URL);
+  
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [userPost, setUserPost] = useState([]);
@@ -60,6 +62,7 @@ export default function Profile() {
   useEffect(() => {
     const loadProfile = async () => {
       const res = await fetch(`${API_URL}/api/profile`, {
+        method: "GET",
         credentials: "include",
       });
 
@@ -272,6 +275,7 @@ export default function Profile() {
   const addMessage = async (toMessId) => {
 
     const res = await fetch(`${API_URL}/api/message/message?toMessId=${toMessId}`, {
+      method: "GET",
       credentials: "include",
     });
 
