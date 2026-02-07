@@ -27,7 +27,7 @@ export default function Home() {
 
     useEffect(() => {
         const loadDashboard = async () => {
-            const res = await fetch(API_URL, {
+            const res = await fetch(`${API_URL}/`, {
                 method: "GET",
                 credentials: "include",
             });
