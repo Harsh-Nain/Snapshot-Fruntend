@@ -3,9 +3,9 @@ import { io } from "socket.io-client";
 import { OnTime } from "../components/agotime";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
-import { API_URL } from "../config/api";
 
 export default function Messages() {
+  const API_URL = import.meta.env.VITE_BACKEND_API_URL
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef(null);

@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
-import { API_URL } from "../config/api";
 
 export default function Profile() {
+  const API_URL = import.meta.env.VITE_BACKEND_API_URL
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [userPost, setUserPost] = useState([]);

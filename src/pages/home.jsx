@@ -4,9 +4,9 @@ import { TimeAgo } from "../components/agotime";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
-import { API_URL } from "../config/api";
 
 export default function Home() {
+    const API_URL = import.meta.env.VITE_BACKEND_API_URL
 
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);

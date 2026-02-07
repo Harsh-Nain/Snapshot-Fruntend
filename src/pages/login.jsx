@@ -1,13 +1,15 @@
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
-import { API_URL } from "../config/api";
 
 export default function Login() {
+    const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors }, } = useForm();
 
     const onSubmit = async (formData) => {
         try {
+            console.log("sended");
+
             const res = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
                 headers: {

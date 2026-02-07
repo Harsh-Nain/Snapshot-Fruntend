@@ -3,9 +3,9 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import DotSpinner from "../components/dot-spinner-anim";
 import { useForm } from "react-hook-form";
 import { TimeAgo } from "../components/agotime";
-import { API_URL } from "../config/api";
 
 export default function OtherUser() {
+    const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const [searchParams] = useSearchParams();
     const userId = searchParams.get("Id");
     const username = searchParams.get("username");

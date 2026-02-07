@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DotSpinner from "../components/dot-spinner-anim";
-import { API_URL } from "../config/api";
 
 export default function CreatePost() {
+  const API_URL = import.meta.env.VITE_BACKEND_API_URL
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [song, setSong] = useState(null);
