@@ -1,8 +1,10 @@
-import { NavLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Signup() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
+    const navigate = useNavigate();
+
     const { register, handleSubmit, formState: { errors } } = useForm();
     const onSubmit = async (formData) => {
         try {
