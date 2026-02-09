@@ -13,6 +13,8 @@ export default function Home() {
     const [user, setUser] = useState();
     const [Likeing, setLikeing] = useState(false);
     const [isPlay, setisPlay] = useState(false);
+    const [suggession, setsuggession] = useState([]);
+    const [IsMessaged, setIsMessaged] = useState([]);
     const [page, setpage] = useState(2);
     const loadingRef = useRef(false);
     const noMoreRef = useRef(false);
@@ -21,6 +23,8 @@ export default function Home() {
     const [Commenting, setCommenting] = useState(false);
     const [Comments, setComments] = useState([]);
     const [showComments, setShowComments] = useState(false);
+    const [isunfollow, setisunfollow] = useState(false);
+
     const [loading, setloading] = useState(false);
     const [CommentsPostId, setCommentsPostId] = useState();
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
@@ -39,8 +43,8 @@ export default function Home() {
 
             const data = await res.json();
             console.log("Dashboard data:", data);
-            console.log(data.post);
-
+            console.log(data);
+            setsuggession(data.suggsionId)
 
             setPosts(data.post || []);
             setUser(data.data || '');
@@ -115,6 +119,24 @@ export default function Home() {
         setShowComments(true);
     };
 
+    const follow = async (requestId) => {
+
+        const res = await fetch(`${API_URL}/api/follow/request`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ requestId }),
+        });
+
+        const result = await res.json();
+        if (result.success) {
+            setIsMessaged(pre => [...pre, requestId])
+            // setsuggession(prev => (prev.filter(u => u.Id !== requestId)));
+        }
+    }
+
     const handleSubmitComment = async (d) => {
 
         const res = await fetch(`${API_URL}/api/post/CreateComment`, {
@@ -170,7 +192,7 @@ export default function Home() {
         loadingRef.current = true;
         setloading(true);
 
-        const res = await fetch(`${API_URL}/api/post/posts?page=${page}`, {  method: "GET",credentials: "include" });
+        const res = await fetch(`${API_URL}/api/post/posts?page=${page}`, { method: "GET", credentials: "include" });
 
         const data = await res.json();
 
@@ -186,6 +208,19 @@ export default function Home() {
 
         setloading(false);
         loadingRef.current = false;
+    }
+
+    const addMessage = async (toMessId) => {
+
+        const res = await fetch(`${API_URL}/api/message/message?toMessId=${toMessId}`, {
+            method: "GET",
+            credentials: "include",
+        });
+
+        const result = await res.json();
+        if (result.success) {
+            navigate(result.redirect)
+        }
     }
 
     return (
@@ -244,7 +279,7 @@ export default function Home() {
                 {loading && <div className="h-10 w-full flex flex-col justify-center items-center"><DotSpinner size="1.5rem" color="#000000" /></div>}
             </div>
 
-            <div className="hidden md:block now text-sm mt-10 pr-10 text-gray-700 nowuser flex justify-center w-1/3">
+            <div className="hidden md:block now text-sm mt-10 xl:pr-10 text-gray-700 nowuser flex justify-center xl:w-1/3 w-2/5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <img src={user && user.image_src} className="w-12 h-12 rounded-full border object-cover" />
@@ -262,23 +297,22 @@ export default function Home() {
                     <p className="text-gray-500">Suggested for you</p>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12">
-                            <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1767356520/ChatGPT_Image_Jan_2_2026_05_50_04_PM_xpxaqz.jpg"
-                                className="w-full h-full rounded-full" />
-                        </div>
-                        <div >
-                            <p className="font-semibold flex items-center gap-1" onClick={() => otherUser(23, "Popular")}>
-                                Snapshot
-                                <span className="text-blue-500">✔</span>
-                            </p>
-                            <p className="text-gray-500 text-sm">Popular</p>
-                        </div>
-                    </div>
-
-                    <button className="text-blue-500">Follow</button>
-                </div>
+                {suggession && <div className="flex flex-col overflow-x-hidden overflow-y-scroll h-[44vh]">
+                    {suggession.map((user, i) => {
+                        return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
+                            <div className="flex flex-row items-center w-[80%] gap-2">
+                                <img src={user.image_src} className="rounded-[50%] border-1 border-gray-400 object-cover size-11" alt="" />
+                                <div className="flex items-center ws flex-col borde sm:items-center">
+                                    <button onClick={() => otherUser(user.Id, user.Username)} className="text-left cursor-pointer userOther">
+                                        {user.Username}
+                                        <p className="text-zinc-600 text-sm text-left">{user.First_name}</p>
+                                    </button>
+                                </div>
+                            </div>
+                            <button onClick={() => IsMessaged.includes(user.Id) ? addMessage(user.Id) : follow(user.Id)} className="p-1 px-5 bg-sky-500 hover:bg-sky-700 cursor-pointer rounded-lg text-white">{IsMessaged.includes(user.Id) ? "Message" : "Follow"}</button>
+                        </div>)
+                    })}
+                </div>}
 
                 <div className="text-gray-500 text-xs mt-6 space-x-2 leading-6">
                     <span>About</span> ·

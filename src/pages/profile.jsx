@@ -6,8 +6,7 @@ import DotSpinner from "../components/dot-spinner-anim";
 
 export default function Profile() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL
-  console.log(API_URL);
-  
+
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [userPost, setUserPost] = useState([]);
@@ -327,7 +326,7 @@ export default function Profile() {
 
   return (
     <main className="flex-1 flex justify-center px-2 overflow-y-auto h-screen">
-      <button onClick={() => Logout()} className="fixed right-1 top-2 text-2xl text-black a font-semibold">📤
+      <button onClick={() => Logout()} className="fixed right-3 top-2 text-2xl text-black a font-semibold">📤
       </button>
       {ConfirmDlt && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90">
         <div className="w-[300px] bg-white p-5 rounded-xl flex justify-center items-center flex-col">
@@ -339,8 +338,8 @@ export default function Profile() {
         </div>
       </div>}
 
-      {loading && <div className="fixed b-0 md:inset-0 h-[100vh] w-[100vw] bg-black/40 flex justify-center items-center z-90"><DotSpinner size="3.5rem" color="#000000" /></div>}
-      <div className="w-[100vw] max-w-5xl bg-white rounded-xl md:px-4 py-4 flex flex-col gap-6">
+      {loading && <div className="fixed b-0 md:inset-0 h-[100vh] w-[100vw] bg-black/40 flex justify-center items-center z-90"><DotSpinner size="3.5rem" color="#044084" /></div>}
+      <div className="w-[100%] max-w-5xl bg-white rounded-xl md:px-4 py-4 flex flex-col gap-6">
 
         <div className="flex flex-col sm:flex-row gap-10 items-center sm:items-start">
 
@@ -488,7 +487,7 @@ export default function Profile() {
                 <button type="submit" disabled={isSubmittingComment} className="text-blue-500 font-semibold text-sm hover:underline">{isSubmittingComment ? "Posting..." : "Post"}</button>
               </form>
             </div>
-          </div> : <DotSpinner size="3rem" color="#000000" />}
+          </div> : <DotSpinner size="3rem" color="#ffffff" />}
         </div>}
 
       {PostOption &&

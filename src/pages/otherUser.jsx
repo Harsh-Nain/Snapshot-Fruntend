@@ -42,7 +42,7 @@ export default function OtherUser() {
 
         const fetchProfile = async () => {
 
-            const res = await fetch('/api/auth/userProfile', {
+            const res = await fetch(`${API_URL}/api/auth/userProfile`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -65,7 +65,7 @@ export default function OtherUser() {
             }
 
             setData(result.data);
-            setLoading(false)
+            setLoading(false)            
             setUserPost(result.userPost || []);
             setFollower(result.follower || []);
             setFollowing(result.following || []);
@@ -267,7 +267,7 @@ export default function OtherUser() {
                             ${!isFollowing ? "bg-blue-400 hover:bg-blue-500 border-white text-white" : "bg-zinc-100 hover:bg-zinc-200"}`}>
                                 {followLoading ? <DotSpinner size="1rem" color="#0084ff" /> : `${isFollowing ? "Unfollow" : "follow"}`}</button>
 
-                            {!isFollowing && <button onClick={() => addMessage(data?.Id)} className="px-4 py-1 text-sm border rounded-lg bg-zinc-100 hover:bg-zinc-200">Message</button>}
+                            {isFollowing && <button onClick={() => addMessage(data?.Id)} className="px-4 py-1 text-sm border rounded-lg bg-zinc-100 hover:bg-zinc-200">Message</button>}
                         </div>
                     </div>
                 </div>

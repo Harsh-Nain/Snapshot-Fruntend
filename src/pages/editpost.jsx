@@ -30,7 +30,7 @@ export default function EditPost() {
     abortRef.current = new AbortController();
 
     const loadPost = async () => {
-      const res = await fetch("/api/post/edit", {
+      const res = await fetch(`${API_URL}/api/post/edit`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
