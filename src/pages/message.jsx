@@ -1,168 +1,154 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { FiCopy, FiTrash2, FiMoreHorizontal } from "react-icons/fi";
 import { io } from "socket.io-client";
+import {
+  FiSend,
+  FiPaperclip,
+  FiArrowLeft,
+  FiSearch,
+  FiMoreVertical,
+  FiSmile,
+} from "react-icons/fi";
 import { OnTime } from "../components/agotime";
-import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
+import "../App.css";
 
 export default function Messages() {
-  const API_URL = import.meta.env.VITE_BACKEND_API_URL
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [message, setMessage] = useState("");
-  const messagesEndRef = useRef(null);
-  const [files, setFiles] = useState([]);
-  const [Messages, setMessages] = useState([]);
-  const [MessagesUser, setMessagesUser] = useState([]);
-  const [sending, setSending] = useState(true);
+  const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+
+  const [activeMsgId, setActiveMsgId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
+
+
   const [user, setUser] = useState(null);
-  const [openChatId, setopenChatId] = useState(null);
+  const [currentId, setCurrentId] = useState(null);
+
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [openChatId, setOpenChatId] = useState(null);
+
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
+  const [files, setFiles] = useState([]);
+
+  const [sending, setSending] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [Url, setUrl] = useState();
-  const [showChat, setshowChat] = useState(false);
-  const [ConfirmDlt, setConfirmDlt] = useState(false);
-  const [currentId, setCurrentId] = useState();
-  const [messageUplode, setmessageUplode] = useState(false);
-  const [MsgDltid, setMsgDltid] = useState();
+  const [typing, setTyping] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [showChat, setShowChat] = useState(false);
+
   const socketRef = useRef(null);
-  const isMobile = useIsMobile(500);
-  const usersContainer = useRef(null);
-  const messageContainer = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  const deleteMessage = async (msgId) => {
+    try {
+      await fetch(`${API_URL}/api/message/unSend?messid=${msgId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      setMessages((prev) => prev.filter((m) => m.Id !== msgId));
+      setConfirmDeleteId(null);
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
+
 
   useEffect(() => {
-    if (!user) return;
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!currentId) return;
 
     socketRef.current = io(API_URL, {
       auth: { userId: String(currentId) },
-      withCredentials: true,
       transports: ["websocket"],
-    });
-
-    socketRef.current.on("connect", () => {
-      console.log("Socket connected:", socketRef.current.id);
+      withCredentials: true,
     });
 
     socketRef.current.on("recieveMessage", (data) => {
-      console.log("recived from", data.FromId, openChatId);
-
       if (Number(data.FromId) === Number(openChatId)) {
         setMessages((prev) => [
           ...prev,
           {
-            Id: data.Id || Date.now(),
+            Id: Date.now(),
             message: data.message,
-            url: data.files || [],
             fromMe: false,
             created_at: data.created_at,
           },
         ]);
       }
-
-      userlist();
+      fetchUsers();
     });
 
-    socketRef.current.on("online:list", ({ onlineUsers }) => {
-      setMessagesUser((prev) =>
-        prev.map((u) => ({
-          ...u,
-          isActive: onlineUsers.includes(String(u.Id)),
-        }))
-      );
+    socketRef.current.on("typing", ({ from }) => {
+      if (from === openChatId) {
+        setTyping(true);
+        setTimeout(() => setTyping(false), 1500);
+      }
     });
 
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, [user]);
-
-  useEffect(() => {
-    if (!socketRef.current) return;
-
-    socketRef.current.on("online:list", ({ onlineUsers }) => {
-      setMessagesUser((prev) =>
-        prev.map((u) => ({
-          ...u,
-          isActive: onlineUsers.includes(String(u.Id)),
-        }))
-      );
-    });
-
-    return () => {
-      socketRef.current.off("online:list");
-    };
-  }, []);
+    return () => socketRef.current.disconnect();
+  }, [currentId, openChatId]);
 
   useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "auto",
-    });
-  }, [Messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typing]);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    (async () => {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/message/message`, {
         credentials: "include",
       });
-
-      if (res.status === 401) return;
-
-      const result = await res.json();
-
-      setCurrentId(result.Id)
-      setUser(result.user);
+      const data = await res.json();
+      setUser(data.user);
+      setCurrentId(data.Id);
       setLoading(false);
-    };
-
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    fetchUser();
-    userlist();
+      fetchUsers();
+    })();
   }, []);
 
-  useEffect(() => {
-    if (!usersContainer.current || !messageContainer.current) return;
-
-    if (isMobile && showChat) {
-      usersContainer.current.classList.add("hidden");
-      messageContainer.current.classList.remove("hidden");
-    } else {
-      usersContainer.current.classList.remove("hidden");
-      messageContainer.current.classList.add("hidden");
-    }
-  }, [isMobile, showChat]);
-
-
-  const userlist = async () => {
+  const fetchUsers = async () => {
     const res = await fetch(`${API_URL}/api/message/userlist`, {
       credentials: "include",
     });
-
-    if (res.status === 401) return;
-
-    const result = await res.json();
-    setMessagesUser(result.message);
+    const data = await res.json();
+    setUsers(data.message || []);
   };
 
-  const handleFileChange = (e) => {
-    setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+  const openChat = async (u) => {
+    setSelectedUser(u);
+    setOpenChatId(u.Id);
+    setMessages([]);
+    if (isMobile) setShowChat(true);
+
+    const res = await fetch(
+      `${API_URL}/api/message/showMessage?Id=${u.Id}`,
+      { method: "POST", credentials: "include" }
+    );
+    const data = await res.json();
+    setMessages(data.data || []);
   };
 
-  const removeFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+  const goBack = () => {
+    setShowChat(false);
+    setSelectedUser(null);
   };
 
   useEffect(() => {
     setSending(!message.trim() && files.length === 0);
   }, [message, files]);
 
-  console.log("🚀 EMIT sendMessage", {
-    to: openChatId,
-    myId: currentId,
-  });
-
   const sendMessage = async () => {
     if (!message.trim() && files.length === 0) return;
-    setmessageUplode(true)
-
-    setSending(true);
 
     const formData = new FormData();
     formData.append("message", message);
@@ -172,19 +158,15 @@ export default function Messages() {
       formData.append("files", file);
     });
 
-    const res = await fetch(
-      `${API_URL}/api/message/saveMessage`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      }
-    );
+    const res = await fetch(`${API_URL}/api/message/saveMessage`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
 
     const result = await res.json();
 
     if (result.success) {
-      userlist()
       setMessages((prev) => [
         ...prev,
         {
@@ -192,378 +174,331 @@ export default function Messages() {
           message: result.data.message,
           url: result.data.url,
           fromMe: true,
+          created_at: result.data.created_at,
         },
       ]);
 
       socketRef.current.emit("sendMessage", {
         to: openChatId,
         message: result.data.message,
-        files: result.data.files,
+        files: result.data.url,
+        FromId: currentId,
         created_at: result.data.created_at,
-        FromId: result.data.senderId
       });
 
-      setmessageUplode(false)
-
-      setTimeout(() => {
-        setMessage("");
-        setFiles([]);
-        setSending(true);
-      }, 300);
+      setMessage("");
+      setFiles([]);
     }
   };
 
-  const openChat = async (name, username, image, Id) => {
-    setSelectedUser({ name, username, image });
-    if (isMobile) {
-      setLoading(true);
-    }
-    setMessages([]);
-    setopenChatId(Id);
 
-    const res = await fetch(
-      `${API_URL}/api/message/showMessage?Id=${Id}`,
-      { method: "POST", credentials: "include" }
-    );
-
-    if (res.status === 401) return;
-
-    const result = await res.json();
-    if (result.success) {
-      setMessages(result.data);
-
-      if (isMobile) {
-        setLoading(false);
-        setshowChat(true);
-      }
-    }
+  const handleTyping = (e) => {
+    setMessage(e.target.value);
+    socketRef.current.emit("typing", { to: openChatId });
   };
-
-  const back = () => {
-    setshowChat(false);
-  }
-
-  function useIsMobile(breakpoint = 500) {
-    const [isMobile, setIsMobile] = useState(
-      typeof window !== "undefined" && window.innerWidth < breakpoint
-    );
-
-    useEffect(() => {
-      const handleResize = () => {
-        setIsMobile(window.innerWidth < breakpoint);
-      };
-
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, [breakpoint]);
-
-    return isMobile;
-  }
-
-  async function handleDeleteMessage(Id) {
-    const res = await fetch(`${API_URL}/api/message/unSend?messid=${Id}`, {
-      method: "delete",
-      credentials: "include"
-    });
-
-    if (!res.ok) {
-      const errorText = await res.json();
-      console.error("Server error:", errorText);
-      return;
-    }
-    setConfirmDlt(false)
-    setMsgDltid()
-    setMessages(prev => prev.filter(post => post.Id !== Id))
-  }
-
-  const confirmDelete = (Id) => {
-    setConfirmDlt(true)
-    setMsgDltid(Id)
-  }
 
   return (
-    <div className="flex w-full h-screen bg-white">
+    <div className="flex w-full h-[91vh] sm:h-screen bg-white overflow-hidden">
 
-      {loading && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90"><DotSpinner size="3.5rem" color="#000000" /></div>}
-      {Url && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90">
-        <div className="p-3 bg-white rounded-xl flex justify-center items-center flex-col">
-          <p onClick={() => setUrl(false)} className="absolute top-2 md:top-5 right-1 md:right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500 hover:text-red-600"></i></p>
-          <div className="flex justify-centet items-center gap-3 h-[90vh] w-[100vw]] md:w-[100%]">
-            <img src={Url} alt="" className="w-[100%] h-[100%] object-contain shadow-lg" />
-          </div>
+      {loading && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <DotSpinner size="3rem" color="#000" />
         </div>
-      </div>}
+      )}
 
-      {ConfirmDlt && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90">
-        <div className="w-[300px] bg-white p-5 rounded-xl flex justify-center items-center flex-col">
-          <p>Confirm to delete message</p>
-          <div className="flex justify-centet items-center gap-3">
-            <button className="text-white px-2 py-1 rounded-xl bg-blue-300 cursor-pointer border-black border-1 hover:bg-blue-400 hover:text-black" onClick={() => setConfirmDlt(false)}>Cancel</button>
-            <button className="text-white px-2 py-1 rounded-lg bg-red-300 cursor-pointer border-black border-1 hover:bg-red-400 hover:text-black" onClick={() => handleDeleteMessage(MsgDltid)}>Delete</button>
+      {(!isMobile || !showChat) && (
+        <div className="w-full sm:w-[30%] border-r flex flex-col">
+          <div className="p-4 font-bold text-lg">{user?.Username}</div>
+
+          <div className="px-4">
+            <div className="flex items-center bg-gray-100 rounded-full px-3">
+              <FiSearch />
+              <input
+                placeholder="Search"
+                className="bg-transparent px-2 py-2 outline-none w-full"
+              />
+            </div>
           </div>
-        </div>
-      </div>}
 
-      {(!showChat && isMobile) &&
-        <div className="w-full md:w-[30%] border-r border-gray-200 flex flex-col">
-          <div className="px-5 py-4 text-lg font-bold">{user?.Username}</div>
-          <div className="px-4"><input className="w-full px-4 py-2 rounded-full bg-gray-100 outline-none" placeholder="Search" /></div>
-
-          <div useRef={usersContainer} className="overflow-y-auto mt-4 px-4">
-            {MessagesUser.map((u, i) => (
-              <button key={i} onClick={() => openChat(u.First_name, u.Username, u.image_src, u.Id)} className={`w-full flex gap-3 items-center p-2 rounded-lg hover:bg-gray-100 transition${u.isActive ? "bg-green-50" : ""}`}>
-                <div className="relative">
-                  <img src={u.image_src} className="w-10 h-10 rounded-full object-cover" />
-                  {u.isActive && (<span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-md"></span>)}
-                </div>
-
+          <div className="flex-1 overflow-y-auto mt-4 px-2">
+            {users.map((u) => (
+              <button
+                key={u.Id}
+                onClick={() => openChat(u)}
+                className="w-full flex gap-3 p-3 rounded-xl hover:bg-gray-100"
+              >
+                <img
+                  src={u.image_src}
+                  className="w-11 h-11 rounded-full object-cover"
+                />
                 <div className="text-left flex-1">
-                  <p className="font-medium flex items-center gap-2">
-                    {u.Username}
-                    {u.isActive && (<span className="text-[10px] text-green-600 font-semibold">• online</span>)}
+                  <p className="font-medium">{u.Username}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {u.lastMessage || "Sent a media"}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{u.lastMessage || "Media"}</p>
                 </div>
               </button>
             ))}
           </div>
-        </div>}
+        </div>
+      )}
 
-      {(showChat && isMobile) &&
-        <div useRef={messageContainer} className="flex-1 md:flex flex-col">
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-5 rounded-xl w-[280px] text-center">
+            <p className="font-medium mb-4">
+              Delete this message?
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => deleteMessage(confirmDeleteId)}
+                className="px-4 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewImage && (
+        <div className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center">
+
+          {/* CLOSE BUTTON */}
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 text-white text-3xl hover:opacity-80"
+          >
+            ✕
+          </button>
+
+          {/* IMAGE */}
+          <img
+            src={previewImage}
+            alt="preview"
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+          />
+        </div>
+      )}
+
+
+      {(!isMobile || showChat) && (
+        <div className="flex-1 flex flex-col">
           {!selectedUser ? (
-            <div className="flex flex-col justify-center items-center h-full">
-              <img src={user?.image_src} className="w-20 h-20 rounded-full mb-4" />
-              <h1 className="text-2xl font-bold">Snapshot</h1>
-              <p className="text-gray-500">
-                Select a conversation to start chatting
-              </p>
+            <div className="flex items-center justify-center h-full">
+              <h2 className="text-xl font-bold">Select a chat</h2>
             </div>
           ) : (
             <>
-              <div className="p-4 border-b flex items-center gap-3">
-                {isMobile && <p onClick={() => back()} className="text-xl">🔙</p>}
-                <img src={selectedUser.image} className="w-10 h-10 rounded-full object-cover" />
-                <div>
-                  <p className="font-semibold">{selectedUser.username}</p>
-                  <p className="text-xs text-gray-500">
-                    {selectedUser.name}
-                  </p>
-                </div>
-              </div>
-
-              <div className={`flex-1 overflow-y-auto ${isMobile ? "h-[77vh]" : "h-[calc(100vh-140px)]"} p-4 space-y-3`}>
-                {Messages.map((msg, i) => {
-                  const isMe = msg.fromMe;
-                  return (
-                    <div key={msg.Id || i} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
-                      <div className="relative group max-w-[75%] text-sm">
-
-                        {msg.message && (
-                          <div className={`px-3 py-2 break-words shadow-sm ${isMe ? "bg-sky-500 text-white rounded-2xl rounded-br-sm" : "bg-gray-200 text-black rounded-2xl rounded-bl-sm"}`}>
-                            {msg.message}
-                          </div>
-                        )}
-
-                        {Array.isArray(msg.url) &&
-
-                          msg.url.map((file, idx) => (
-                            <div key={idx} className={`mt-2 overflow-hidden rounded-xl bg-gray-100 ${isMe ? "ml-auto" : "mr-auto"}`}>
-                              {file?.type?.startsWith("image") && (
-                                <img onClick={() => setUrl(file.url)} src={file.url || file} className="w-[10rem] object-cover" />
-                              )}
-
-                              {file?.type?.startsWith("audio") && (
-                                <audio controls src={file.url} className="w-[15rem]" />
-                              )}
-
-                              {file?.type?.startsWith("application") && (
-                                <p className="px-3 py-2 text-sm text-gray-700">📄 {file.name} </p>
-                              )}
-
-                              {file?.type?.startsWith("video") && (
-                                <video width={"200px"} controls src={file.url}></video>
-                              )}
-                            </div>
-                          ))}
-
-                        <p className={`mt-1 text-[10px] text-gray-400 ${isMe ? "text-right" : "text-left"}`}>{OnTime(msg.created_at)}</p>
-
-                        <div className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-16" : "-right-16"} flex gap-1 opacity-0 group-hover:opacity-100 transition`}>
-                          {msg.message && <button onClick={() => navigator.clipboard.writeText(msg.message)} className="bg-white hover:border border-blue-200 shadow px-2 py-1 rounded-md text-xs hover:bg-gray-100">📋</button>}
-                          {isMe && (<button onClick={() => confirmDelete(msg.Id)} className="bg-white hover:border border-red-200 shadow px-2 py-1 rounded-md text-xs text-red-600 hover:bg-red-50 border" >Dlt</button>)}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
-
-              <div className="p-3 flex flex-col gap-2">
-                <div className={`flex flex-col gap-2 border border-blue-900 px-3 py-2 rounded-xl bg-white ${isMobile ? "fixed bottom-13 left-1/2 -translate-x-1/2 w-[95%] z-50" : "w-full"}`}>
-                  {files.length > 0 && (
-                    <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto">
-                      {files.map((file, i) => (
-                        <div key={i} className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg text-xs" >
-                          <span className="truncate max-w-[120px]">{file.name}</span>
-                          <button onClick={() => removeFile(i)} className="text-red-500 hover:text-red-600" >
-                            ❌
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+              <div className="p-4 border-b flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {isMobile && (
+                    <button onClick={goBack} className="text-xl">
+                      <FiArrowLeft />
+                    </button>
                   )}
-
-                  <div className="flex items-center gap-2 w-full">
-                    <input type="file" multiple hidden id="file" onChange={handleFileChange} />
-                    <label htmlFor="file" className="cursor-pointer text-lg">➕</label>
-                    <input className="flex-1 outline-none bg-transparent" placeholder="Message..." value={message} onChange={(e) => setMessage(e.target.value)} />
-
-                    {!sending && (
-                      <button id="sendButton" onClick={sendMessage}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 664 663">
-                          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="33.67" stroke="#6c6c6c" d="M646.293 331.888L17.7538 17.6187L155.245 331.888 M646.293 331.888L17.753 646.157L155.245 331.888 M646.293 331.888L318.735 330.228L155.245 331.888" />
-                        </svg>
-                      </button>)}
-                    {messageUplode && <DotSpinner size="1rem" color="#1d99ff" />}
+                  <img
+                    src={selectedUser.image_src}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="flex flex-col">
+                    <p className="font-semibold">{selectedUser.Username}</p>
+                    <p className="text-xs">{selectedUser.First_name}</p>
                   </div>
                 </div>
+                <FiMoreVertical />
               </div>
 
-            </>
-          )}
-        </div>}
-
-      {!isMobile && <div className="w-full md:w-[30%] border-r border-gray-200 flex flex-col">
-        <div className="px-5 py-4 text-lg font-bold">{user?.Username}</div>
-        <div className="px-4"><input className="w-full px-4 py-2 rounded-full bg-gray-100 outline-none" placeholder="Search" /></div>
-
-        <div useRef={usersContainer} className="overflow-y-auto mt-4 px-4">
-          {MessagesUser.map((u, i) => (
-            <button key={i} onClick={() => openChat(u.First_name, u.Username, u.image_src, u.Id)} className={`w-full flex gap-3 items-center p-2 rounded-lg hover:bg-gray-100 transition${u.isActive ? "bg-green-50" : ""}`}>
-              <div className="relative">
-                <img src={u.image_src} className="w-10 h-10 rounded-full object-cover" />
-                {u.isActive && (<span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-md"></span>)}
-              </div>
-
-              <div className="text-left flex-1">
-                <p className="font-medium flex items-center gap-2">
-                  {u.Username}
-                  {u.isActive && (<span className="text-[10px] text-green-600 font-semibold">• online</span>)}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{u.lastMessage || "Media"}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>}
-
-      {!isMobile && <div useRef={messageContainer} className="flex-1 md:flex flex-col">
-        {!selectedUser ? (
-          <div className="flex flex-col justify-center items-center h-full">
-            <img src={user?.image_src} className="w-20 h-20 rounded-full mb-4" />
-            <h1 className="text-2xl font-bold">Snapshot</h1>
-            <p className="text-gray-500">
-              Select a conversation to start chatting
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="p-4 border-b flex items-center gap-3">
-              {isMobile && <p onClick={() => back()} className="text-xl">🔙</p>}
-              <img src={selectedUser.image} className="w-10 h-10 rounded-full object-cover" />
-              <div>
-                <p className="font-semibold">{selectedUser.username}</p>
-                <p className="text-xs text-gray-500">
-                  {selectedUser.name}
-                </p>
-              </div>
-            </div>
-
-            <div className={`flex-1 overflow-y-auto ${isMobile ? "h-[77vh]" : "h-[calc(100vh-140px)]"} p-4 space-y-3`}>
-              {Messages.map((msg, i) => {
-                const isMe = msg.fromMe;
-                return (
-                  <div key={msg.Id || i} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
-                    <div className="relative group max-w-[75%] text-sm">
-
-                      {msg.message && (
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messages.map((m, i) => (
+                  <div
+                    key={i} onMouseEnter={() => setActiveMsgId(m.Id)}
+                    onMouseLeave={() => setActiveMsgId(null)}
+                    className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className="relative max-w-[75%] group"
+                      onMouseEnter={() => setActiveMsgId(m.Id)}
+                      onMouseLeave={() => setActiveMsgId(null)}
+                    >
+                      {m.message && (
                         <div
-                          className={`px-3 py-2 break-words shadow-sm ${isMe ? "bg-sky-500 text-white rounded-2xl rounded-br-sm" : "bg-gray-200 text-black rounded-2xl rounded-bl-sm"}`}>
-                          {msg.message}
+                          className={`px-4 py-2 text-sm shadow break-words
+          ${m.fromMe
+                              ? "bg-gradient-to-br from-pink-500 to-orange-400 text-white rounded-2xl rounded-br-md"
+                              : "bg-gray-100 text-black rounded-2xl rounded-bl-md"
+                            }`}
+                        >
+                          {m.message}
                         </div>
                       )}
 
-                      {Array.isArray(msg.url) &&
-
-                        msg.url.map((file, idx) => (
-                          <div key={idx} className={`mt-2 overflow-hidden rounded-xl bg-gray-100 ${isMe ? "ml-auto" : "mr-auto"}`}>
-                            {file?.type?.startsWith("image") && (
-                              <img onClick={() => setUrl(file.url)} src={file.url || file} className="w-[10rem] object-cover" />
+                      {/* FILES */}
+                      {Array.isArray(m.url) &&
+                        m.url.map((file, idx) => (
+                          <div key={idx} className="mt-2">
+                            {file.type?.startsWith("image") && (
+                              <img
+                                src={file.url}
+                                alt="img"
+                                onClick={() => setPreviewImage(file.url)}
+                                className="rounded-xl max-w-[220px] cursor-pointer hover:opacity-90 transition"
+                              />
                             )}
 
-                            {file?.type?.startsWith("audio") && (
-                              <audio controls src={file.url} className="w-[15rem]" />
+
+                            {file.type?.startsWith("video") && (
+                              <video
+                                controls
+                                src={file.url}
+                                className="rounded-xl max-w-[240px]"
+                              />
                             )}
 
-                            {file?.type?.startsWith("application") && (
-                              <p className="px-3 py-2 text-sm text-gray-700">📄 {file.name} </p>
+                            {file.type?.startsWith("audio") && (
+                              <audio controls src={file.url} className="w-[220px]" />
                             )}
 
-                            {file?.type?.startsWith("video") && (
-                              <video width={"200px"} controls src={file.url}></video>
+                            {file.type?.startsWith("application") && (
+                              <a
+                                href={file.url}
+                                download
+                                className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow text-sm"
+                              >
+                                📄 <span className="truncate max-w-[160px]">{file.name}</span>
+                              </a>
                             )}
                           </div>
                         ))}
 
-                      <p className={`mt-1 text-[10px] text-gray-400 ${isMe ? "text-right" : "text-left"}`}>{OnTime(msg.created_at)}</p>
+                      {/* TIME */}
+                      <p
+                        className={`text-[10px] mt-1 opacity-70 ${m.fromMe ? "text-right" : "text-left"
+                          }`}
+                      >
+                        {OnTime(m.created_at)}
+                      </p>
 
-                      <div className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-16" : "-right-16"} flex gap-1 opacity-0 group-hover:opacity-100 transition`}>
-                        {msg.message && <button onClick={() => navigator.clipboard.writeText(msg.message)} className="bg-white border border-blue-50 hover:border-blue-200 shadow px-2 py-1 rounded-md text-xs hover:bg-gray-100">📋</button>}
-                        {isMe && (<button onClick={() => confirmDelete(msg.Id)} className="bg-white hover:border border-red-200 shadow px-2 py-1 rounded-md text-xs text-red-600 hover:bg-red-50 border" >Dlt</button>)}
-                      </div>
+                      {/* ACTION MENU (HOVER) */}
+                      {activeMsgId === m.Id && (
+                        <div
+                          className={`absolute top-1/2 -translate-y-1/2 flex gap-1
+          ${m.fromMe ? "-left-16" : "-right-16"}`}
+                        >
+                          {/* COPY */}
+                          {m.message && (
+                            <button
+                              onClick={() => navigator.clipboard.writeText(m.message)}
+                              className="bg-white shadow p-2 rounded-full hover:bg-gray-100"
+                              title="Copy"
+                            >
+                              <FiCopy size={14} />
+                            </button>
+                          )}
+
+                          {/* DELETE (ONLY OWN MESSAGE) */}
+                          {m.fromMe && (
+                            <button
+                              onClick={() => setConfirmDeleteId(m.Id)}
+                              className="bg-white shadow p-2 rounded-full text-red-500 hover:bg-red-50"
+                              title="Delete"
+                            >
+                              <FiTrash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
 
-            <div className="p-3 flex flex-col gap-2">
-              <div className={`flex flex-col gap-2 border border-blue-900 px-3 py-2 rounded-xl bg-white ${isMobile ? "fixed bottom-13 left-1/2 -translate-x-1/2 w-[95%] z-50" : "w-full"}`}>
+                ))}
+
+                {/* TYPING INDICATOR */}
+                {typing && (
+                  <p className="text-xs text-gray-400 italic px-2">
+                    typing...
+                  </p>
+                )}
+
+                {/* AUTO SCROLL */}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* INPUT */}
+              <div className="w-full border-t bg-white px-3 py-2">
+
+                {/* FILE PREVIEW */}
                 {files.length > 0 && (
-                  <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto">
-                    {files.map((file, i) => (
-                      <div key={i} className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg text-xs" >
-                        <span className="truncate max-w-[120px]">{file.name}</span>
-                        <button onClick={() => removeFile(i)} className="text-red-500 hover:text-red-600" >
-                          ❌
+                  <div className="flex gap-2 overflow-x-auto mb-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg text-xs"
+                      >
+                        <span className="truncate max-w-[120px]">
+                          {file.name}
+                        </span>
+                        <button
+                          onClick={() =>
+                            setFiles((prev) => prev.filter((_, i) => i !== index))
+                          }
+                          className="text-red-500"
+                        >
+                          ✕
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
 
+                {/* INPUT ROW */}
                 <div className="flex items-center gap-2 w-full">
-                  <input type="file" multiple hidden id="file" onChange={handleFileChange} />
-                  <label htmlFor="file" className="cursor-pointer text-lg">➕</label>
-                  <input className="flex-1 outline-none bg-transparent" placeholder="Message..." value={message} onChange={(e) => setMessage(e.target.value)} />
+                  <label htmlFor="file" className="cursor-pointer text-xl">
+                    <FiPaperclip />
+                  </label>
 
-                  {!sending && (
-                    <button id="sendButton" onClick={sendMessage}>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 664 663">
-                        <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="33.67" stroke="#6c6c6c" d="M646.293 331.888L17.7538 17.6187L155.245 331.888 M646.293 331.888L17.753 646.157L155.245 331.888 M646.293 331.888L318.735 330.228L155.245 331.888" />
-                      </svg>
-                    </button>)}
-                  {messageUplode && <DotSpinner size="1rem" color="#1d99ff" />}
+                  <input
+                    id="file"
+                    type="file"
+                    hidden
+                    multiple
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+                    onChange={(e) => setFiles([...e.target.files])}
+                  />
+
+                  <input
+                    value={message}
+                    onChange={handleTyping}
+                    placeholder="Message..."
+                    className="flex-1 bg-gray-100 px-4 py-2 rounded-full outline-none"
+                  />
+
+                  {/* <FiSmile className="text-xl text-gray-500" /> */}
+
+                  <button
+                    onClick={sendMessage}
+                    disabled={sending}
+                    className={`p-2 rounded-full ${sending
+                      ? "text-gray-400"
+                      : "bg-gradient-to-r from-pink-500 to-orange-400 text-white"
+                      }`}
+                  ><FiSend />
+                  </button>
                 </div>
               </div>
-            </div>
 
-          </>
-        )}
-      </div>}
-    </div >
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

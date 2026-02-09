@@ -55,6 +55,7 @@ export default function Navbar() {
     }, [isSearchOpen]);
 
     const Logout = async () => {
+        setIsSearchOpen(false)
         const res = await fetch(`${API_URL}/api/logout`, {
             method: "GET",
             credentials: "include",
@@ -70,13 +71,13 @@ export default function Navbar() {
             {isDesktop && (
                 <aside className="w-[250px] h-screen sticky top-0 flex flex-col px-3 py-4 border-r bg-white">
 
-                    <NavLink to="/" className="px-3 pb-6">
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
                         <span className="text-2xl font-semibold tracking-tight">
                             Snapshot
                         </span>
                     </NavLink>
 
-                    <NavLink to="/" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={navItem}>
                         {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
                         <span className="text-sm">Home</span>
                     </NavLink>
@@ -86,17 +87,17 @@ export default function Navbar() {
                         <span className="text-sm">Search</span>
                     </button>
 
-                    <NavLink to="/api/post/post" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={navItem}>
                         <CreateOutline />
                         <span className="text-sm">Create</span>
                     </NavLink>
 
-                    <NavLink to="/api/message/message" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={navItem}>
                         <MessageOutline />
                         <span className="text-sm">Messages</span>
                     </NavLink>
 
-                    <NavLink to="/api/profile" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={navItem}>
                         <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
                         <span className="text-sm">Profile</span>
                     </NavLink>
@@ -160,7 +161,7 @@ export default function Navbar() {
             {!isDesktop && (
                 <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t flex justify-around py-2 z-999999999">
 
-                    <NavLink to="/" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={navItem}>
                         {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
                     </NavLink>
 
@@ -168,15 +169,15 @@ export default function Navbar() {
                         <SearchOutline />
                     </button>
 
-                    <NavLink to="/api/post/post" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={navItem}>
                         <CreateOutline />
                     </NavLink>
 
-                    <NavLink to="/api/message/message" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={navItem}>
                         <MessageOutline />
                     </NavLink>
 
-                    <NavLink to="/api/profile" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={navItem}>
                         <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
                     </NavLink>
                 </nav>
