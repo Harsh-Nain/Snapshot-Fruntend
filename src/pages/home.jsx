@@ -268,8 +268,8 @@ export default function Home() {
                             <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1767356520/ChatGPT_Image_Jan_2_2026_05_50_04_PM_xpxaqz.jpg"
                                 className="w-full h-full rounded-full" />
                         </div>
-                        <div>
-                            <p className="font-semibold flex items-center gap-1">
+                        <div >
+                            <p className="font-semibold flex items-center gap-1" onClick={() => otherUser(23, "Popular")}>
                                 Snapshot
                                 <span className="text-blue-500">✔</span>
                             </p>
