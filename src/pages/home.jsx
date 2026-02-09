@@ -334,7 +334,7 @@ export default function Home() {
             </div>
 
             {showComments && (
-                <div className="fixed w-[100vw] bottom-[16vh] md:bottom-0 left-0 h-[40vh] md:h-[100vh] z-1000 bg-[#00000082] flex justify-center items-center">
+                <div className="fixed w-[100vw] bottom-[15vh] md:bottom-0 left-0 h-[40vh] md:h-[100vh] z-1000 bg-[#00000082] flex justify-center items-center">
                     <p onClick={() => closeComment()} className="absolute -top-17 md:top-5 right-1 md:right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
 
                     <div className="w-[100vw] md:w-[60vw] md:h-[81vh] overflow-hidden rounded-sm flex flex-col items-center bg-white">
