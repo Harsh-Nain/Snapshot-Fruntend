@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 export default function Navbar() {
     const navigate = useNavigate();
     const [isDesktop, setIsDesktop] = useState(false);
+    const API_URL = import.meta.env.VITE_BACKEND_API_URL
 
     useEffect(() => {
         const handleResize = () => {
@@ -17,9 +18,9 @@ export default function Navbar() {
     }, []);
 
     const Logout = async () => {
-        const res = await fetch("http://localhost:5000/api/logout", {
+        const res = await fetch(`${API_URL}/api/logout`, {
             method: "GET",
-            credentials: "include", 
+            credentials: "include",
         });
 
         const result = await res.json();
