@@ -7,7 +7,6 @@ import {
   FiArrowLeft,
   FiSearch,
   FiMoreVertical,
-  FiSmile,
 } from "react-icons/fi";
 import { OnTime } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
@@ -36,12 +35,14 @@ export default function Messages() {
   const [LoadMess, setLoadMess] = useState(false);
   const [typing, setTyping] = useState(false);
   const [page, setpage] = useState(2);
+  const pageRef = useRef(1);
+  const loadingRef = useRef(false);
+  const noMoreRef = useRef(false);
+
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [showChat, setShowChat] = useState(false);
   const [messloaging, setMessLoading] = useState(false);
-  const noMoreRef = useRef(false);
-  const loadingRef = useRef(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -166,7 +167,7 @@ export default function Messages() {
     const res = await fetch(`${API_URL}/api/message/userlist`, {
       credentials: "include",
     });
-    const data = await res.json();    
+    const data = await res.json();
     setUsers(data.message || []);
   };
 
@@ -174,6 +175,11 @@ export default function Messages() {
     setSelectedUser(u);
     setOpenChatId(u.Id);
     setMessages([]);
+
+    pageRef.current = 1;
+    noMoreRef.current = false;
+    loadingRef.current = false;
+
     if (isMobile) setShowChat(true);
     setLoading(true)
 
@@ -184,6 +190,10 @@ export default function Messages() {
     const data = await res.json();
     setMessages(data.data || []);
     setLoading(false)
+
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView();
+    }, 0);
   };
 
   const goBack = () => {
@@ -246,65 +256,49 @@ export default function Messages() {
     socketRef.current.emit("typing", { to: openChatId });
   };
 
-  useEffect(() => {
-    const container = MessContainer.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-
-      if (loadingRef.current || noMoreRef.current) return;
-      console.log('ok', container.scrollTop);
-
-
-      if (container.scrollTop <= 50) {
-        loadMessages();
-      }
-    }
-    container.addEventListener("scroll", handleScroll);
-
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [page]);
-
   async function loadMessages() {
-    if (loadingRef.current || noMoreRef.current) return;
+    if (loadingRef.current || noMoreRef.current || !openChatId) return;
 
     const container = MessContainer.current;
     if (!container) return;
-    console.log('done')
 
     loadingRef.current = true;
     setMessLoading(true);
-    setTimeout(() => {
-      setMessLoading(false);
-    }, 1000);
 
     const prevScrollHeight = container.scrollHeight;
 
     const res = await fetch(
-      `${API_URL}/api/message/loadmess?page=${page}&Id=${openChatId}`,
-      {
-        method: "GET",
-        credentials: "include",
-      }
+      `${API_URL}/api/message/loadmess?page=${pageRef.current}&Id=${openChatId}`,
+      { credentials: "include" }
     );
 
     const result = await res.json();
-    const mes = result.data;
+    const oldMessages = result.data || [];
 
-    setMessages(prev => [...mes, ...prev]);
-
-    if (!result.hasMore) {
+    if (oldMessages.length === 0) {
       noMoreRef.current = true;
+      setMessLoading(false);
+      loadingRef.current = false;
+      return;
     }
 
-    setpage(p => p + 1);
-    setMessLoading(false)
+    setMessages(prev => [...oldMessages, ...prev]);
+
+    pageRef.current += 1;
+
     requestAnimationFrame(() => {
       const newScrollHeight = container.scrollHeight;
       container.scrollTop = newScrollHeight - prevScrollHeight;
     });
 
+    setMessLoading(false);
+    loadingRef.current = false;
   }
+
+  const toggleActions = (id) => {
+    setActiveMsgId(prev => (prev === id ? null : id));
+  };
+
 
   const formatLastTime = (time) => {
     if (!time) return "";
@@ -323,7 +317,6 @@ export default function Messages() {
       month: "short",
     });
   };
-
 
   return (
     <div className="flex w-full h-[91vh] sm:h-screen bg-white overflow-hidden">
@@ -441,27 +434,39 @@ export default function Messages() {
               </div>
 
               <div ref={MessContainer} className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messloaging && <p className="w-full flex justify-center items-center"><DotSpinner /></p>}
+                {!noMoreRef.current && (
+                  <div className="w-full flex justify-center mb-3">
+                    <button onClick={loadMessages} disabled={messloaging} className="px-4 cursor-pointer py-1 text-xs rounded-full border bg-white shadow hover:bg-gray-100 transition disabled:opacity-60">
+                      {messloaging ? (
+                        <DotSpinner size="1rem" />
+                      ) : (
+                        "Load more messages"
+                      )}
+                    </button>
+                  </div>
+                )}
+
                 {messages.map((m, i) => (
-                  <div key={i} onMouseEnter={() => setActiveMsgId(m.Id)} onMouseLeave={() => setActiveMsgId(null)} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`} >
-                    <div className="relative max-w-[75%] group" onClick={() => setActiveMsgId(m.Id)}>
+                  <div key={i} className={`flex ${m.fromMe ? "justify-end" : "justify-start"} mb-2`} >
+                    <div className="relative max-w-[75%]" onClick={() => toggleActions(m.Id)}>
                       {m.message && (
-                        <div className={`px-4 py-2 text-sm shadow break-words ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-voilate-400 rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"}`}>
+                        <div className={`px-4 py-2 text-sm break-words shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-400 text-white rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"}`}>
                           {m.message}
                         </div>
                       )}
 
                       {Array.isArray(m.url) &&
                         m.url.map((file, idx) => (
-                          <div key={idx} className={`mt-2 p-1 ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-voilate-400 rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"} shadow`}>
+                          <div key={idx} className={`mt-2 p-1 shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-400 rounded-2xl rounded-br-md" : "bg-gray-100 rounded-2xl rounded-bl-md"}`}>
                             {file.type?.startsWith("image") && (
-                              <img src={file.url} alt="img" onClick={() => setPreviewImage(file.url)} className="rounded-xl max-w-[220px] cursor-pointer hover:opacity-90 transition" />
+                              <img src={file.url} onClick={() => setPreviewImage(file.url)} className="rounded-xl max-w-[220px] cursor-pointer" />
                             )}
-
-                            {file.type?.startsWith("video") && (<video controls src={file.url} className="rounded-xl max-w-[240px]" />)}
-
-                            {file.type?.startsWith("audio") && (<audio controls src={file.url} className="w-[220px]" />)}
-
+                            {file.type?.startsWith("video") && (
+                              <video controls src={file.url} className="rounded-xl max-w-[240px]" />
+                            )}
+                            {file.type?.startsWith("audio") && (
+                              <audio controls src={file.url} className="w-[220px]" />
+                            )}
                             {file.type?.startsWith("application") && (
                               <a href={file.url} download className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow text-sm">
                                 📄 <span className="truncate max-w-[160px]">{file.name}</span>
@@ -470,26 +475,29 @@ export default function Messages() {
                           </div>
                         ))}
 
-                      {(m.message || m.url) && <p className={`text-[10px] mt-1 opacity-70 ${m.fromMe ? "text-right" : "text-left"}`}>{OnTime(m.created_at)}</p>}
+                      {(m.message || m.url) && (
+                        <p className={`text-[10px] mt-1 opacity-60 ${m.fromMe ? "text-right" : "text-left"}`} >
+                          {OnTime(m.created_at)}
+                        </p>
+                      )}
 
                       {activeMsgId === m.Id && (
-                        <div className={`absolute top-1/2 -translate-y-1/2 flex gap-1 ${m.fromMe ? "-left-17" : "-right-13"}`}>
+                        <div className={`flex gap-2 mt-1 transition-all duration-200 ${m.fromMe ? "justify-end" : "justify-start"}`}>
                           {m.message && (
-                            <button onClick={() => navigator.clipboard.writeText(m.message)} className="bg-white shadow p-2 rounded-full hover:bg-gray-100" title="Copy">
-                              <FiCopy size={14} />
+                            <button onClick={() => navigator.clipboard.writeText(m.message)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-white shadow hover:bg-gray-100">
+                              <FiCopy size={12} /> Copy
                             </button>
                           )}
 
                           {m.fromMe && (
-                            <button onClick={() => setConfirmDeleteId(m.Id)} className="bg-white shadow p-2 rounded-full text-red-500 hover:bg-red-50" title="Delete" >
-                              <FiTrash2 size={14} />
+                            <button onClick={() => setConfirmDeleteId(m.Id)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-600 shadow hover:bg-red-100">
+                              <FiTrash2 size={12} /> Delete
                             </button>
                           )}
                         </div>
                       )}
                     </div>
                   </div>
-
                 ))}
 
                 {typing && (<p className="text-xs text-gray-400 italic px-2">  typing... </p>)}

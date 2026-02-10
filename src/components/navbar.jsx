@@ -141,9 +141,9 @@ export default function Navbar() {
 
                             {users.map((user) => (
                                 <div key={user.Id} onClick={() => navigate(`/user?username=${user.Username}&Id=${user.Id}`)} className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-zinc-100">
-                                    <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" alt="" />
+                                    <img src={user.image_src} onClick={() => setIsSearchOpen(false)} className="w-10 h-10 rounded-full object-cover" alt="" />
 
-                                    <div className="leading-tight">
+                                    <div className="leading-tight" onClick={() => setIsSearchOpen(false)}>
                                         <p className="text-sm font-semibold">
                                             {user.Username}
                                         </p>
