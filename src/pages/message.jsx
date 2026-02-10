@@ -35,27 +35,34 @@ export default function Messages() {
   const [loading, setLoading] = useState(false);
   const [LoadMess, setLoadMess] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [page, setpage] = useState(2);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [showChat, setShowChat] = useState(false);
+  const [messloaging, setMessLoading] = useState(false);
+  const noMoreRef = useRef(false);
+  const loadingRef = useRef(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const MessContainer = useRef()
 
   const deleteMessage = async (msgId) => {
-    try {
-      await fetch(`${API_URL}/api/message/unSend?messid=${msgId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+    await fetch(`${API_URL}/api/message/unSend?messid=${msgId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-      setMessages((prev) => prev.filter((m) => m.Id !== msgId));
-      setConfirmDeleteId(null);
-    } catch (err) {
-      console.error("Delete failed", err);
-    }
+    setMessages((prev) => prev.filter((m) => m.Id !== msgId));
+    setConfirmDeleteId(null);
+
+    socketRef.current.emit("deleteMess", {
+      to: openChatId,
+      Id: msgId,
+      message: "Message has been deleted",
+      FromId: currentId
+    });
   };
-
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -79,13 +86,58 @@ export default function Messages() {
           data,
         ]);
       }
+      setUsers((prev) => {
+        const updated = prev.map((u) =>
+          u.Id === data.FromId
+            ? { ...u, lastMessage: data.message }
+            : u
+        );
+        const sender = updated.find((u) => u.Id === data.FromId);
+        const rest = updated.filter((u) => u.Id !== data.FromId);
+
+        return sender ? [sender, ...rest] : updated;
+      });
+
+      if (Number(data.FromId) === Number(openChatId)) {
+        setMessages((prev) => [...prev, data]);
+      }
+
       fetchUsers();
     });
 
-    socketRef.current.on("typing", ({ from }) => {
-      if (from === openChatId) {
-        setTyping(true);
-        setTimeout(() => setTyping(false), 1500);
+    socketRef.current.on("deletedrecive", (data) => {
+      if (Number(data.FromId) === Number(openChatId)) {
+        setMessages(prevMessages =>
+          prevMessages.map(msg =>
+            msg.Id === data.Id
+              ? { ...msg, message: data.message }
+              : msg
+          )
+        );
+      }
+    });
+
+    socketRef.current.on("online:list", ({ onlineUsers }) => {
+      setUsers((prevUsers) => {
+        const updated = prevUsers.map((u) => ({
+          ...u,
+          isOnline: onlineUsers.includes(String(u.Id)),
+        }));
+
+        return updated.sort((a, b) => {
+          if (a.isOnline === b.isOnline) return 0;
+          return a.isOnline ? -1 : 1;
+        });
+      });
+    });
+
+
+
+    socketRef.current.on("typing", (data) => {
+      console.log(data);
+
+      if (Number(data.FromId) === Number(openChatId)) {
+        setTyping(true)
       }
     });
 
@@ -114,7 +166,7 @@ export default function Messages() {
     const res = await fetch(`${API_URL}/api/message/userlist`, {
       credentials: "include",
     });
-    const data = await res.json();
+    const data = await res.json();    
     setUsers(data.message || []);
   };
 
@@ -194,6 +246,85 @@ export default function Messages() {
     socketRef.current.emit("typing", { to: openChatId });
   };
 
+  useEffect(() => {
+    const container = MessContainer.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+
+      if (loadingRef.current || noMoreRef.current) return;
+      console.log('ok', container.scrollTop);
+
+
+      if (container.scrollTop <= 50) {
+        loadMessages();
+      }
+    }
+    container.addEventListener("scroll", handleScroll);
+
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [page]);
+
+  async function loadMessages() {
+    if (loadingRef.current || noMoreRef.current) return;
+
+    const container = MessContainer.current;
+    if (!container) return;
+    console.log('done')
+
+    loadingRef.current = true;
+    setMessLoading(true);
+    setTimeout(() => {
+      setMessLoading(false);
+    }, 1000);
+
+    const prevScrollHeight = container.scrollHeight;
+
+    const res = await fetch(
+      `${API_URL}/api/message/loadmess?page=${page}&Id=${openChatId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    const result = await res.json();
+    const mes = result.data;
+
+    setMessages(prev => [...mes, ...prev]);
+
+    if (!result.hasMore) {
+      noMoreRef.current = true;
+    }
+
+    setpage(p => p + 1);
+    setMessLoading(false)
+    requestAnimationFrame(() => {
+      const newScrollHeight = container.scrollHeight;
+      container.scrollTop = newScrollHeight - prevScrollHeight;
+    });
+
+  }
+
+  const formatLastTime = (time) => {
+    if (!time) return "";
+
+    const diff = Date.now() - new Date(time).getTime();
+    const min = Math.floor(diff / 60000);
+
+    if (min < 1) return "now";
+    if (min < 60) return `${min}m`;
+
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h`;
+
+    return new Date(time).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
+  };
+
+
   return (
     <div className="flex w-full h-[91vh] sm:h-screen bg-white overflow-hidden">
 
@@ -215,15 +346,53 @@ export default function Messages() {
           </div>
 
           <div className="flex-1 overflow-y-auto mt-4 px-2">
+
             {users.map((u) => (
-              <button key={u.Id} onClick={() => openChat(u)} className="w-full flex gap-3 p-3 rounded-xl hover:bg-gray-100">
-                <img src={u.image_src} className="w-11 h-11 rounded-full object-cover" />
-                <div className="text-left flex-1">
-                  <p className="font-medium">{u.Username}</p>
-                  <p className="text-xs text-gray-500 truncate"> {u.lastMessage || "Sent a media"} </p>
+              <button
+                key={u.Id}
+                onClick={() => openChat(u)}
+                className="relative w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition"
+              >
+                <div className="relative shrink-0">
+                  <img
+                    src={u.image_src}
+                    alt={u.Username}
+                    className="w-11 h-11 rounded-full object-cover"
+                  />
+
+                  {u.isOnline && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold truncate">{u.Username}</p>
+
+                    <span className="text-[11px] text-gray-400">
+                      {formatLastTime(u.created_at)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500 truncate">
+                      {u.lastMessage || "Sent a media"}
+                    </p>
+
+                    {u.isOnline ? (
+                      <span className="text-[10px] font-semibold text-green-600">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-gray-400">
+                        Offline
+                      </span>
+                    )}
+                  </div>
                 </div>
               </button>
             ))}
+
           </div>
         </div>
       )}
@@ -241,7 +410,7 @@ export default function Messages() {
       )}
 
       {previewImage && (
-        <div className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/90 z-[9999999999999999999999999999999999] flex items-center justify-center">
           <button onClick={() => setPreviewImage(null)} className="absolute top-4 right-4 text-white text-3xl hover:opacity-80">✕</button>
           <img src={previewImage} alt="preview" className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl" />
         </div>
@@ -271,19 +440,20 @@ export default function Messages() {
                 <FiMoreVertical />
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div ref={MessContainer} className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messloaging && <p className="w-full flex justify-center items-center"><DotSpinner /></p>}
                 {messages.map((m, i) => (
                   <div key={i} onMouseEnter={() => setActiveMsgId(m.Id)} onMouseLeave={() => setActiveMsgId(null)} className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`} >
-                    <div className="relative max-w-[75%] group" onMouseEnter={() => setActiveMsgId(m.Id)}>
+                    <div className="relative max-w-[75%] group" onClick={() => setActiveMsgId(m.Id)}>
                       {m.message && (
-                        <div className={`px-4 py-2 text-sm shadow break-words ${m.fromMe ? "bg-gradient-to-br from-pink-500 to-orange-400 text-white rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"}`}>
+                        <div className={`px-4 py-2 text-sm shadow break-words ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-voilate-400 rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"}`}>
                           {m.message}
                         </div>
                       )}
 
                       {Array.isArray(m.url) &&
                         m.url.map((file, idx) => (
-                          <div key={idx} className="mt-2">
+                          <div key={idx} className={`mt-2 p-1 ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-voilate-400 rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"} shadow`}>
                             {file.type?.startsWith("image") && (
                               <img src={file.url} alt="img" onClick={() => setPreviewImage(file.url)} className="rounded-xl max-w-[220px] cursor-pointer hover:opacity-90 transition" />
                             )}
@@ -300,7 +470,7 @@ export default function Messages() {
                           </div>
                         ))}
 
-                      <p className={`text-[10px] mt-1 opacity-70 ${m.fromMe ? "text-right" : "text-left"}`}>{OnTime(m.created_at)}</p>
+                      {(m.message || m.url) && <p className={`text-[10px] mt-1 opacity-70 ${m.fromMe ? "text-right" : "text-left"}`}>{OnTime(m.created_at)}</p>}
 
                       {activeMsgId === m.Id && (
                         <div className={`absolute top-1/2 -translate-y-1/2 flex gap-1 ${m.fromMe ? "-left-17" : "-right-13"}`}>

@@ -72,7 +72,7 @@ export default function Navbar() {
                 <aside className="w-[250px] h-screen sticky top-0 flex flex-col px-3 py-4 border-r bg-white">
 
                     <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
-                        <span className="text-2xl font-semibold tracking-tight">
+                        <span className="text-2xl font-cursive tracking-tight text-sky-400">
                             Snapshot
                         </span>
                     </NavLink>

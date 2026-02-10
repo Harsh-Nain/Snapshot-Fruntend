@@ -23,7 +23,6 @@ export default function Home() {
     const [Commenting, setCommenting] = useState(false);
     const [Comments, setComments] = useState([]);
     const [showComments, setShowComments] = useState(false);
-    const [isunfollow, setisunfollow] = useState(false);
 
     const [loading, setloading] = useState(false);
     const [CommentsPostId, setCommentsPostId] = useState();
@@ -250,6 +249,7 @@ export default function Home() {
                                 <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
                             </div>
                             <div className="flex flex-row">
+                                {post.Id}
                                 <div className="flex flex-col gap-2 pl-3 items-center w-[fit-content]">
                                     <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
                                         {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
