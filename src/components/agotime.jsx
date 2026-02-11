@@ -19,7 +19,6 @@ export function TimeAgo(date) {
     return "just now";
 }
 
-
 export function OnTime(date) {
     if (!date) return "";
 
@@ -54,4 +53,15 @@ export function OnTime(date) {
         month: "short",
         year: "numeric",
     });
+}
+
+export function formatCount(num) {
+    if (num < 1000) return num.toString();
+
+    const units = ["K", "M", "B", "T"];
+    const order = Math.floor(Math.log10(num) / 3);
+    const unit = units[order - 1];
+    const scaled = num / Math.pow(1000, order);
+
+    return scaled.toFixed(1).replace(/\.0$/, "") + unit;
 }

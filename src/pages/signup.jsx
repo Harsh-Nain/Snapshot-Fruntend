@@ -1,33 +1,33 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Signup() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const navigate = useNavigate();
+    const [message, setmessage] = useState("")
 
     const { register, handleSubmit, formState: { errors } } = useForm();
     const onSubmit = async (formData) => {
-        try {
-            const res = await fetch(`${API_URL}/api/auth/signup`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(formData),
-            });
+        const res = await fetch(`${API_URL}/api/auth/signup`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(formData),
+        });
 
-            const data = await res.json();
-            console.log("Signup response:", data);
+        const data = await res.json();
+        console.log("Signup response:", data);
 
-            if (!res.ok) {
-                throw new Error(data.message || "Login failed");
-            }
+        if (!data.success) return setmessage(data.message)
 
-            navigate("/api/auth/login");
-        } catch (err) {
-            alert(err.message);
+        if (!res.ok) {
+            throw new Error(data.message || "Login failed");
         }
+
+        navigate("/api/auth/login");
     };
 
     return (
@@ -77,6 +77,7 @@ export default function Signup() {
                             })}
                         />
                         {errors.password && (<p className="text-xs text-red-500">  {errors.password.message}</p>)}
+                        {message && (<p className="text-xs text-red-500 text-center">{message}</p>)}
                     </div>
 
                     <button type="submit" className="mt-2 bg-sky-500 hover:bg-sky-600 active:scale-[0.98] text-white py-2.5 rounded-lg text-sm font-medium transition" >

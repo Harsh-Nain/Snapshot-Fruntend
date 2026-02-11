@@ -67,43 +67,42 @@ export default function Navbar() {
     return (
         <>
             {isDesktop && (
-                <aside className="w-[250px] h-screen sticky top-0 flex flex-col gap-1 px-3 py-4 border-r bg-white">
+                <aside className="w-[250px] h-screen sticky top-0 flex flex-col  justify-between px-3 py-4 border-r bg-white">
+                    <div className="flex flex-col gap-1">
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
+                            <span className="text-2xl font-[cursive] tracking-tight text-sky-400">Snapshot</span>
+                        </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
-                        <span className="text-2xl font-[cursive] tracking-tight text-sky-400">
-                            Snapshot
-                        </span>
-                    </NavLink>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                            {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
+                            <span className="text-sm">Home</span>
+                        </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
-                        <span className="text-sm">Home</span>
-                    </NavLink>
+                        <button onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex cursor-pointer items-center gap-4 px-3 py-3 rounded-lg transition ${isSearchOpen ? "bg-green-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                            <SearchOutline />
+                            <span className="text-sm">Search</span>
+                        </button>
 
-                    <NavLink onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex items-center gap-4 px-3 py-3 rounded-lg transition ${isSearchOpen ? "bg-green-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <SearchOutline />
-                        <span className="text-sm">Search</span>
-                    </NavLink>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                            <CreateOutline />
+                            <span className="text-sm">Create</span>
+                        </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <CreateOutline />
-                        <span className="text-sm">Create</span>
-                    </NavLink>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                            <MessageOutline />
+                            <span className="text-sm">Messages</span>
+                        </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <MessageOutline />
-                        <span className="text-sm">Messages</span>
-                    </NavLink>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                            <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
+                            <span className="text-sm">Profile</span>
+                        </NavLink>
+                    </div>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
-                        <span className="text-sm">Profile</span>
-                    </NavLink>
-
-                    <NavLink onClick={Logout} className="flex items-center gap-4 px-3 py-3 rounded-lg transition hover:bg-zinc-100" >
+                    <button onClick={Logout} className="flex items-center gap-4 px-3 py-3 rounded-lg transition hover:bg-zinc-100" >
                         <LogoutOutline />
                         <span className="text-sm">Logout</span>
-                    </NavLink>
+                    </button>
                 </aside>
             )}
 
@@ -152,7 +151,7 @@ export default function Navbar() {
                                 </div>
                             ))}
 
-                            {users.length < 1 && (
+                            {(users.length < 1 && !query) && (
                                 <p className="flex justify-center items-center text-center text-sm text-zinc-500 mt-6 h-[60vh]">
                                     Start typing a username to <br /> search for users...
                                 </p>

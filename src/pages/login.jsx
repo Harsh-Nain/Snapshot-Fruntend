@@ -1,35 +1,33 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Login() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const navigate = useNavigate();
+    const [message, setmessage] = useState("")
     const { register, handleSubmit, formState: { errors }, } = useForm();
 
     const onSubmit = async (formData) => {
-        try {
-            console.log("sended");
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(formData),
+        });
 
-            const res = await fetch(`${API_URL}/api/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(formData),
-            });
+        const data = await res.json();
+        console.log("Login response:", data);
 
-            const data = await res.json();
-            console.log("Login response:", data);
+        if (!data.success) return setmessage(data.message)
 
-            if (!res.ok) {
-                throw new Error(data.message || "Login failed");
-            }
-
-            navigate("/");
-        } catch (err) {
-            alert(err.message);
+        if (!res.ok) {
+            throw new Error(data.message || "Login failed");
         }
+
+        navigate("/");
     };
 
     return (
@@ -50,6 +48,7 @@ export default function Login() {
                                 })}
                             />
                             {errors.username && (<p className="text-xs text-red-500"> {errors.username.message}</p>)}
+                            {message && (<p className="text-xs text-red-500 text-center"> {message}</p>)}
                         </div>
 
                         <div className="flex flex-col gap-1">
