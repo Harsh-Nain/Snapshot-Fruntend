@@ -344,7 +344,7 @@ export default function Profile() {
         <div className="flex flex-col sm:flex-row gap-10 items-center sm:items-start">
 
           <div className="w-32 h-32">
-            <img src={data?.image_src} alt="" className="w-full h-full rounded-full object-cover" />
+            <img src={data?.image_src} alt="" className="bg-gradient-to-r from-pink-500 to-orange-400 w-full h-full rounded-full object-cover" />
           </div>
 
           <div className="flex-1 flex flex-col gap-2 items-center sm:items-start">
@@ -375,7 +375,7 @@ export default function Profile() {
 
         <div className="grid grid-cols-3 gap-2 border-t pt-4">
           {userPost.map((post) => (
-            <div key={post.Id} className="cursor-pointer" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
+            <div key={post.Id} className="cursor-pointer bg-gradient-to-r from-zinc-100 to-zinc-200 rounded" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
               <img src={post.image_url} alt="post" className="w-full h-full object-cover" />
             </div>
           ))}
@@ -542,7 +542,7 @@ export default function Profile() {
             {folowdata.map((user, i) => {
               return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
                 <div className="flex flex-row items-center w-[80%] gap-2">
-                  <img src={user.image_src} className="size-11 rounded-[50%] border-1 border-gray-400 object-cover" alt="" />
+                  <img src={user.image_src} className="size-11 bg-gradient-to-r from-pink-500 to-orange-400 rounded-[50%] border-1 border-gray-400 object-cover" alt="" />
 
                   <div className="flex items-center ws flex-col borde sm:items-center">
                     <button onClick={() => otherUser(user.Id, user.Username)} className="cursor-pointer text-left">
@@ -560,7 +560,7 @@ export default function Profile() {
             {suggession.map((user, i) => {
               return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
                 <div className=" flex flex-row items-center w-[80%] gap-2">
-                  <img src={user.image_src} className="rounded-[50%] border-1 border-gray-400 object-cover size-11" alt="" />
+                  <img src={user.image_src} className="rounded-[50%] bg-gradient-to-r from-pink-500 to-orange-400 border-1 border-gray-400 object-cover size-11" alt="" />
                   <div className="flex items-center ws flex-col borde sm:items-center">
                     <button onClick={() => otherUser(user.Id, user.Username)} className="cursor-pointer userOther">
                       {user.Username}

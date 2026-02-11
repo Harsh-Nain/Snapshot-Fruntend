@@ -253,7 +253,7 @@ export default function Home() {
                                     </button>}
                                 <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
                             </div>
-                            <div className="flex flex-row px-3 gap-3 sm:p-0">
+                            <div className="flex flex-row px-3 gap-2 sm:p-0">
                                 <div className="flex flex-col gap-2 items-center w-[fit-content]">
                                     <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
                                         {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
@@ -262,12 +262,12 @@ export default function Home() {
                                     <span className="text-xs text-gray-500">{formatCount(post.totalLikes)} Likes</span>
                                 </div>
 
-                                <div className="cursor-pointer pt-[3px]">
+                                <div className="cursor-pointer pt-[4px]">
                                     <button className="h-[17px]" onClick={() => handleComment(post.Id)}>
                                         {Commenting ? <DotSpinner size="1rem" color="#777777" /> :
                                             <span className="flex gap-2"><svg aria-label="Comment" fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
                                                 <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
-                                            </svg> <span className="text-sm text-gray-800">{formatCount(post.commentCount)}</span></span>
+                                            </svg> <span className="text-sm text-gray-800">{post.commentCount > 1 && formatCount(post.commentCount)}</span></span>
                                         } </button>
                                 </div>
                             </div>
