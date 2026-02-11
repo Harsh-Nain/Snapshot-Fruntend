@@ -132,7 +132,7 @@ export default function EditPost() {
   return (
 
     <div className="w-full min-h-screen flex items-center justify-center bg-zinc-50 md:px-4">
-      {!loading ? <form onSubmit={handleSubmit} className="w-full max-w-5xl bg-white md:border rounded-2xl shadow-sm flex flex-col md:flex-row overflow-hidden">
+      {!loading ? <form onSubmit={handleSubmit} className="w-full max-w-5xl bg-white md:border h-[88vh] sm:h-[83.5vh] rounded-2xl shadow-sm flex flex-col md:flex-row overflow-hidden">
         <label className="w-full md:w-1/2 h-[300px] md:h-[460px] flex items-center justify-center cursor-pointer bg-zinc-100 border-b md:border-b-0 md:border-r">
           {!imagePreview ? (
             <span className="text-zinc-400 text-center text-sm">

@@ -17,18 +17,16 @@ function App() {
   return (
     <>
       {!hideNavbar && <Navbar />}
-      <div className="flex flex-row w-full justify-around w-full">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/api/profile" element={<Profile />} />
-          <Route path="/user" element={<OtherUser />} />
-          <Route path="/api/post/post" element={<Post />} />
-          <Route path="/post/edit" element={<EditPost />} />
-          <Route path="/api/message/message" element={<Messages />} />
-          <Route path="/api/auth/login" element={<Login />} />
-          <Route path="/api/auth/register" element={<Signup />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/api/profile" element={<Profile />} />
+        <Route path="/user" element={<OtherUser />} />
+        <Route path="/api/post/post" element={<Post />} />
+        <Route path="/post/edit" element={<EditPost />} />
+        <Route path="/api/message/message" element={<Messages />} />
+        <Route path="/api/auth/login" element={<Login />} />
+        <Route path="/api/auth/register" element={<Signup />} />
+      </Routes>
     </>
   );
 }

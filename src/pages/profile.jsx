@@ -435,15 +435,15 @@ export default function Profile() {
       </div>}
 
       {Postloading &&
-        <div className="fixed top-0 left-0 bg-[#00000087] flex justify-center items-center w-[100vw] h-[100vh]">
-          {Post ? <div className="bg-black shadow-xl flex justify-start items-center sm:w-[100vw] md:w-[70%] h-[100vh] sm:h-[80vh] sm:max-w-5xl flex flex-col md:flex-row overflow-hidden">
-            <div className="w-[100vw] h-[50vh] md:w-1/2 flex items-center justify-center md:max-h-[100vh] bg-black">
-              <img src={Post.image_url} alt="Post Not Found..." className="w-[100vw] max-h-[50vh] md:max-h-[100vh] object-contain" />
+        <div className="fixed top-0 left-0 bg-[#00000087] flex justify-center sm:items-center items-baseline w-[100vw] h-[100vh]">
+          {Post ? <div className="bg-black shadow-xl flex justify-start items-center sm:w-[100vw] md:w-[70%] h-[88vh] sm:max-w-5xl flex-col md:flex-row overflow-hidden">
+            <div className="w-[100vw] h-[50vh] md:w-1/2 flex items-center justify-center md:max-h-[100vh]">
+              <img src={Post.image_url} alt="Post Not Found..." className="w-[100vw] max-h-[40vh] md:max-h-[100vh] object-contain" />
             </div>
 
             <p onClick={() => { setPost(), setPostloading() }} className="absolute top-5 right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
 
-            <div className="w-[100vw] md:w-1/2 flex flex-col bg-white">
+            <div className="w-[100vw] md:w-1/2 flex flex-col bg-white h-full">
               <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white z-10">
                 <div className="flex items-center gap-3">
                   <img src={Post.image_src} className="w-8 h-8 rounded-full object-cover" />

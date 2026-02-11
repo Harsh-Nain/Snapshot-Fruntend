@@ -223,7 +223,7 @@ export default function Home() {
 
     return (
         <>
-            <div ref={postContainer} className="sm:p-0 sm:w-[100%] md:w-1/2 flex flex-col overflow-y-scroll overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-7 h-[92vh] md:h-[100vh]">
+            <div ref={postContainer} className="sm:p-0 sm:w-[100%] md:w-1/2 flex flex-col overflow-y-scroll overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-7 h-[88vh] md:h-[100vh]">
                 {posts.map((post, i) => {
                     return (<div key={i} className="flex flex-col gap-3 w-full pt-5">
 

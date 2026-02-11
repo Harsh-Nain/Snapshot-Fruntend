@@ -69,7 +69,7 @@ export default function Navbar() {
     return (
         <>
             {isDesktop && (
-                <aside className="w-[250px] h-screen sticky top-0 flex flex-col px-3 py-4 border-r bg-white">
+                <aside className="w-[250px] h-screen sticky top-0 flex flex-col gap-1 px-3 py-4 border-r bg-white">
 
                     <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
                         <span className="text-2xl font-cursive tracking-tight text-sky-400">
@@ -77,35 +77,35 @@ export default function Navbar() {
                         </span>
                     </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
                         <span className="text-sm">Home</span>
                     </NavLink>
 
-                    <button onClick={() => setIsSearchOpen(!isSearchOpen)} className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex items-center gap-4 px-3 py-3 rounded-lg transition ${isSearchOpen ? "bg-green-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <SearchOutline />
                         <span className="text-sm">Search</span>
-                    </button>
+                    </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <CreateOutline />
                         <span className="text-sm">Create</span>
                     </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <MessageOutline />
                         <span className="text-sm">Messages</span>
                     </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
                         <span className="text-sm">Profile</span>
                     </NavLink>
 
-                    <button onClick={Logout} className="mt-auto flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-100" >
+                    <NavLink onClick={Logout} className="flex items-center gap-4 px-3 py-3 rounded-lg transition hover:bg-zinc-100" >
                         <LogoutOutline />
                         <span className="text-sm">Logout</span>
-                    </button>
+                    </NavLink>
                 </aside>
             )}
 
@@ -153,6 +153,13 @@ export default function Navbar() {
                                     </div>
                                 </div>
                             ))}
+
+                            {users.length < 1 && (
+                                <p className="flex justify-center items-center text-center text-sm text-zinc-500 mt-6 h-[60vh]">
+                                    Start typing a username to <br /> search for users...
+                                </p>
+                            )}
+
                         </div>
                     </div>
                 </>
@@ -161,23 +168,23 @@ export default function Navbar() {
             {!isDesktop && (
                 <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t flex justify-around py-2 z-999999999">
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
                     </NavLink>
 
-                    <button onClick={() => setIsSearchOpen(!isSearchOpen)} className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex items-center gap-4 px-3 py-3 rounded-lg transition ${isSearchOpen ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <SearchOutline />
-                    </button>
+                    </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <CreateOutline />
                     </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <MessageOutline />
                     </NavLink>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={navItem}>
+                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
                         <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
                     </NavLink>
                 </nav>
