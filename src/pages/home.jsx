@@ -222,63 +222,66 @@ export default function Home() {
     }
 
     return (
-        <>
-            <div ref={postContainer} className="sm:p-0 sm:w-[100%] md:w-1/2 flex flex-col overflow-y-scroll overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-7 h-[88vh] md:h-[100vh]">
+        <div className="flex flex-col sm:flex-row justify-around w-full h-[88vh] md:h-[100vh]">
+            <span className="sm:hidden text-2xl font-[cursive] tracking-tight text-sky-400 px-2 pt-3 pb-1">Snapshot</span>
+
+            <div ref={postContainer} className="sm:p-0 sm:w-[100%] md:w-1/2  flex flex-col overflow-y-scroll overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-5 h-[88vh] md:h-[100vh]">
                 {posts.map((post, i) => {
-                    return (<div key={i} className="flex flex-col gap-3 w-full pt-5">
+                    return (
+                        <div key={i} className="flex flex-col gap-3 w-full mt-5 py-3">
 
-                        <div className="flex flex-col rounded-xl w-full gap-2">
+                            <div className="flex flex-col rounded-xl w-full gap-2 px-3">
 
-                            <div className="flex items-center gap-3 px-3">
-                                <button className="cursor-pointer flex items-center gap-2" onClick={() => otherUser(post.userId, post.username)}>
-                                    <img src={post.image_src} alt="user" className="size-9 rounded-full object-cover" />
+                                <div className="flex items-center gap-3">
+                                    <button className="cursor-pointer flex items-center gap-2" onClick={() => otherUser(post.userId, post.username)}>
+                                        <img src={post.image_src} alt="user" className="size-9 rounded-full object-cover" />
 
-                                    <p className="flex flex-col text-left">
-                                        <span>{post.username}</span>
-                                        <span className="text-xs px-1">{post.desc}</span>
-                                    </p>
-                                </button>
-                            </div>
-
-                            <div className="relative w-full overflow-hidden border-y border-gray-300 md:h-[87vh] bg-black">
-                                {post.songUrl &&
-                                    <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
-                                        <i className={`fa-solid fa-xs ${!isPlay ? "fa-volume-xmark" : "fa-volume-high"}`}></i>
-                                        post.songUrl && <audio src={post.songUrl}></audio>
-                                    </button>}
-                                <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
-                            </div>
-                            <div className="flex flex-row">
-                                <div className="flex flex-col gap-2 pl-3 items-center w-[fit-content]">
-                                    <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
-                                        {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
-                                            <i className={`fa-heart ${post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
-                                        } </button>
-                                    <span className="text-xs text-gray-500">{post.totalLikes} Likes</span>
+                                        <p className="flex flex-col text-left">
+                                            <span>{post.username}</span>
+                                            <span className="text-xs px-1">{post.desc}</span>
+                                        </p>
+                                    </button>
                                 </div>
 
-                                <div className="px-3 cursor-pointer pt-[3px]">
-                                    <button className="h-[17px]" onClick={() => handleComment(post.Id)}>
-                                        {Commenting ? <DotSpinner size="1rem" color="#0097e3" /> :
-                                            <svg aria-label="Comment" fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
-                                                <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
-                                            </svg>
-                                        } </button>
+                                <div className="relative w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 rounded border-y border-gray-300 md:h-[87vh] bg-black">
+                                    {post.songUrl &&
+                                        <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
+                                            <i className={`fa-solid fa-xs ${!isPlay ? "fa-volume-xmark" : "fa-volume-high"}`}></i>
+                                            post.songUrl && <audio src={post.songUrl}></audio>
+                                        </button>}
+                                    <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
                                 </div>
-                            </div>
+                                <div className="flex flex-row">
+                                    <div className="flex flex-col gap-2 items-center w-[fit-content]">
+                                        <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
+                                            {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
+                                                <i className={`fa-heart ${post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
+                                            } </button>
+                                        <span className="text-xs text-gray-500">{post.totalLikes} Likes</span>
+                                    </div>
 
-                            <div className="px-3">
-                                <p className="text-sm cursor-pointer" onClick={() => handleComment(post.Id)}>View all comments</p>
-                                <p className="text-sm text-zinc-600">{post.postName}</p>
-                            </div>
+                                    <div className="cursor-pointer pt-[3px]">
+                                        <button className="h-[17px]" onClick={() => handleComment(post.Id)}>
+                                            {Commenting ? <DotSpinner size="1rem" color="#0097e3" /> :
+                                                <svg aria-label="Comment" fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
+                                                    <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
+                                                </svg>
+                                            } </button>
+                                    </div>
+                                </div>
 
-                        </div>
-                    </div>)
+                                <div>
+                                    <p className="text-sm cursor-pointer" onClick={() => handleComment(post.Id)}>View all comments</p>
+                                    <p className="text-sm text-zinc-600">{post.postName}</p>
+                                </div>
+
+                            </div>
+                        </div>)
                 })}
                 {loading && <div className="h-10 w-full flex flex-col justify-center items-center"><DotSpinner size="1.5rem" color="#000000" /></div>}
             </div>
 
-            <div className="hidden md:block now text-sm mt-10 xl:pr-10 text-gray-700 nowuser flex justify-center xl:w-1/3 w-2/5">
+            <div className="hidden md:block now text-sm mt-10 xl:pr-10  text-gray-700 nowuser flex justify-center xl:w-1/3 w-2/5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <img src={user && user.image_src} className="w-12 h-12 rounded-full border object-cover" />
@@ -370,6 +373,6 @@ export default function Home() {
 
                 </div>
             )}
-        </>
+        </div>
     )
 }

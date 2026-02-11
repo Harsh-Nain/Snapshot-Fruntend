@@ -64,15 +64,13 @@ export default function Navbar() {
         navigate(result.redirect);
     };
 
-    const navItem = "flex items-center gap-4 px-3 py-3 rounded-lg hover:bg-zinc-100 transition";
-
     return (
         <>
             {isDesktop && (
                 <aside className="w-[250px] h-screen sticky top-0 flex flex-col gap-1 px-3 py-4 border-r bg-white">
 
                     <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
-                        <span className="text-2xl font-cursive tracking-tight text-sky-400">
+                        <span className="text-2xl font-[cursive] tracking-tight text-sky-400">
                             Snapshot
                         </span>
                     </NavLink>
