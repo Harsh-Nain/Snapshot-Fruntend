@@ -443,7 +443,7 @@ export default function Profile() {
 
             <p onClick={() => { setPost(), setPostloading() }} className="absolute top-5 right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
 
-            <div className="w-[100vw] md:w-1/2 flex flex-col">
+            <div className="w-[100vw] md:w-1/2 flex flex-col bg-white">
               <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white z-10">
                 <div className="flex items-center gap-3">
                   <img src={Post.image_src} className="w-8 h-8 rounded-full object-cover" />
