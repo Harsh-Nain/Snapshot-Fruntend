@@ -450,14 +450,14 @@ export default function Messages() {
                   <div key={i} className={`flex ${m.fromMe ? "justify-end" : "justify-start"} mb-2`} >
                     <div className="relative max-w-[75%]" onClick={() => toggleActions(m.Id)}>
                       {m.message && (
-                        <div className={`px-4 py-2 text-sm break-words shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-400 text-white rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"}`}>
+                        <div className={`px-4 py-2 text-sm break-words shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-300 text-white rounded-2xl rounded-br-md" : "bg-gray-100 text-black rounded-2xl rounded-bl-md"}`}>
                           {m.message}
                         </div>
                       )}
 
                       {Array.isArray(m.url) &&
                         m.url.map((file, idx) => (
-                          <div key={idx} className={`mt-2 p-1 shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-400 rounded-2xl rounded-br-md" : "bg-gray-100 rounded-2xl rounded-bl-md"}`}>
+                          <div key={idx} className={`mt-2 p-1 shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-300 rounded-2xl rounded-br-md" : "bg-gray-100 rounded-2xl rounded-bl-md"}`}>
                             {file.type?.startsWith("image") && (
                               <img src={file.url} onClick={() => setPreviewImage(file.url)} className="rounded-xl max-w-[220px] cursor-pointer" />
                             )}

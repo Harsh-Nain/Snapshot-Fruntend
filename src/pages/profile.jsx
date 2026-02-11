@@ -436,8 +436,8 @@ export default function Profile() {
 
       {Postloading &&
         <div className="fixed top-0 left-0 bg-[#00000087] flex justify-center items-center w-[100vw] h-[100vh]">
-          {Post ? <div className="bg-white shadow-xl flex justify-start items-center sm:w-[100vw] md:w-[70%] h-[100vh] sm:h-[80vh] sm:max-w-5xl flex flex-col md:flex-row overflow-hidden">
-            <div className="w-[100vw] h-[50vh] md:w-1/2 bg-black flex items-center justify-center md:max-h-[100vh] bg-black">
+          {Post ? <div className="bg-black shadow-xl flex justify-start items-center sm:w-[100vw] md:w-[70%] h-[100vh] sm:h-[80vh] sm:max-w-5xl flex flex-col md:flex-row overflow-hidden">
+            <div className="w-[100vw] h-[50vh] md:w-1/2 flex items-center justify-center md:max-h-[100vh] bg-black">
               <img src={Post.image_url} alt="Post Not Found..." className="w-[100vw] max-h-[50vh] md:max-h-[100vh] object-contain" />
             </div>
 
