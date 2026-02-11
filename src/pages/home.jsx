@@ -4,6 +4,8 @@ import { TimeAgo } from "../components/agotime";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
+import { IoVolumeMute } from "react-icons/io5";
+import { IoVolumeHigh } from "react-icons/io5";
 
 export default function Home() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
@@ -243,8 +245,8 @@ export default function Home() {
 
                             <div className="relative w-full overflow-hidden sm:border border-zinc-200 dark:border-zinc-800 sm:rounded md:h-[87vh] bg-black">
                                 {post.songUrl &&
-                                    <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
-                                        <i className={`fa-solid fa-xs ${!isPlay ? "fa-volume-xmark" : "fa-volume-high"}`}></i>
+                                    <button onClick={(e) => playSong(e, post.Id)} className="cursor-pointer absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
+                                        {isPlay ? <IoVolumeHigh /> : < IoVolumeMute />}
                                         {post.songUrl && <audio src={post.songUrl}></audio>}
                                     </button>}
                                 <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
