@@ -525,7 +525,7 @@ export default function Messages() {
                   <input id="file" type="file" hidden multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={(e) => setFiles([...e.target.files])} />
                   <input value={message} onChange={handleTyping} placeholder={LoadMess ? "Sending..." : "Message..."} className="flex-1 bg-gray-100 px-4 py-2 rounded-full outline-none" />
 
-                  <button onClick={sendMessage} disabled={sending} className={`p-2 rounded-full ${sending ? "text-gray-400" : "bg-gradient-to-r from-pink-500 to-orange-400 text-white"}`}>{LoadMess ? <DotSpinner size="1rem" color="white" /> : <FiSend />}
+                  <button onClick={sendMessage} disabled={sending} className={`p-2 rounded-full ${sending ? "text-gray-400" : "bg-gradient-to-r from-pink-500 to-orange-400 text-white"}`}>{LoadMess ? <DotSpinner size="1rem" color="#ffbb00" /> : <FiSend />}
                   </button>
                 </div>
               </div>

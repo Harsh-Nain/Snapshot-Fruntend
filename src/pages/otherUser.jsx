@@ -265,7 +265,7 @@ export default function OtherUser() {
                         <div className="flex gap-3">
                             <button onClick={() => isFollowing ? unfollow(data?.Id) : follow(data?.Id)} className={`px-4 py-1 cursor-pointer text-sm border rounded-lg 
                             ${!isFollowing ? "bg-blue-400 hover:bg-blue-500 border-white text-white" : "bg-zinc-100 hover:bg-zinc-200"}`}>
-                                {followLoading ? <DotSpinner size="1rem" color="#0084ff" /> : `${isFollowing ? "Unfollow" : "follow"}`}</button>
+                                {followLoading ? <DotSpinner size="1rem" color="#ffbb00" /> : `${isFollowing ? "Unfollow" : "follow"}`}</button>
 
                             {isFollowing && <button onClick={() => addMessage(data?.Id)} className="px-4 py-1 text-sm border rounded-lg bg-zinc-100 hover:bg-zinc-200">Message</button>}
                         </div>

@@ -183,7 +183,7 @@ export default function EditPost() {
           </label>
 
           <button type="submit" disabled={loading} className="mt-2 bg-sky-500 hover:bg-sky-600 text-white py-2.5 rounded-lg font-semibold transition disabled:opacity-50">
-            {loading ? "Updating..." : "Update Post"}
+            {loading ? <DotSpinner size="1rem" color="#ffbb00" /> : "Update Post"}
           </button>
         </div>
       </form> : <DotSpinner size="3rem" color="#000000" />}
