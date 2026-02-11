@@ -245,7 +245,7 @@ export default function Home() {
                                 {post.songUrl &&
                                     <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
                                         <i className={`fa-solid fa-xs ${!isPlay ? "fa-volume-xmark" : "fa-volume-high"}`}></i>
-                                        post.songUrl && <audio src={post.songUrl}></audio>
+                                        {post.songUrl && <audio src={post.songUrl}></audio>}
                                     </button>}
                                 <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
                             </div>
