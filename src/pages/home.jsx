@@ -228,54 +228,51 @@ export default function Home() {
             <div ref={postContainer} className="sm:p-0 sm:w-[100%] md:w-1/2  flex flex-col overflow-y-scroll overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-5 h-[88vh] md:h-[100vh]">
                 {posts.map((post, i) => {
                     return (
-                        <div key={i} className="flex flex-col gap-3 w-full mt-5 py-3">
+                        <div key={i} className="flex flex-col gap-2 w-full mt-5 sm:px-3">
 
-                            <div className="flex flex-col rounded-xl w-full gap-2 px-3">
+                            <div className="flex items-center gap-3 px-3 sm:p-0">
+                                <button className="cursor-pointer flex items-center gap-2" onClick={() => otherUser(post.userId, post.username)}>
+                                    <img src={post.image_src} alt="user" className="size-9 rounded-full object-cover bg-gradient-to-r from-sky-500 to-violate-400 border-1 border-zinc-100" />
 
-                                <div className="flex items-center gap-3">
-                                    <button className="cursor-pointer flex items-center gap-2" onClick={() => otherUser(post.userId, post.username)}>
-                                        <img src={post.image_src} alt="user" className="size-9 rounded-full object-cover" />
-
-                                        <p className="flex flex-col text-left">
-                                            <span>{post.username}</span>
-                                            <span className="text-xs px-1">{post.desc}</span>
-                                        </p>
-                                    </button>
-                                </div>
-
-                                <div className="relative w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 rounded border-y border-gray-300 md:h-[87vh] bg-black">
-                                    {post.songUrl &&
-                                        <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
-                                            <i className={`fa-solid fa-xs ${!isPlay ? "fa-volume-xmark" : "fa-volume-high"}`}></i>
-                                            post.songUrl && <audio src={post.songUrl}></audio>
-                                        </button>}
-                                    <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
-                                </div>
-                                <div className="flex flex-row">
-                                    <div className="flex flex-col gap-2 items-center w-[fit-content]">
-                                        <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
-                                            {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
-                                                <i className={`fa-heart ${post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
-                                            } </button>
-                                        <span className="text-xs text-gray-500">{post.totalLikes} Likes</span>
-                                    </div>
-
-                                    <div className="cursor-pointer pt-[3px]">
-                                        <button className="h-[17px]" onClick={() => handleComment(post.Id)}>
-                                            {Commenting ? <DotSpinner size="1rem" color="#0097e3" /> :
-                                                <svg aria-label="Comment" fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
-                                                    <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
-                                                </svg>
-                                            } </button>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <p className="text-sm cursor-pointer" onClick={() => handleComment(post.Id)}>View all comments</p>
-                                    <p className="text-sm text-zinc-600">{post.postName}</p>
-                                </div>
-
+                                    <p className="flex flex-col text-left">
+                                        <span>{post.username}</span>
+                                        <span className="text-xs px-1">{post.desc}</span>
+                                    </p>
+                                </button>
                             </div>
+
+                            <div className="relative w-full overflow-hidden sm:border border-zinc-200 dark:border-zinc-800 sm:rounded md:h-[87vh] bg-black">
+                                {post.songUrl &&
+                                    <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
+                                        <i className={`fa-solid fa-xs ${!isPlay ? "fa-volume-xmark" : "fa-volume-high"}`}></i>
+                                        post.songUrl && <audio src={post.songUrl}></audio>
+                                    </button>}
+                                <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
+                            </div>
+                            <div className="flex flex-row px-3 sm:p-0">
+                                <div className="flex flex-col gap-2 items-center w-[fit-content]">
+                                    <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
+                                        {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
+                                            <i className={`fa-heart ${post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
+                                        } </button>
+                                    <span className="text-xs text-gray-500">{post.totalLikes} Likes</span>
+                                </div>
+
+                                <div className="cursor-pointer pt-[3px]">
+                                    <button className="h-[17px]" onClick={() => handleComment(post.Id)}>
+                                        {Commenting ? <DotSpinner size="1rem" color="#0097e3" /> :
+                                            <svg aria-label="Comment" fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
+                                                <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
+                                            </svg>
+                                        } </button>
+                                </div>
+                            </div>
+
+                            <div className="px-3 sm:p-0">
+                                <p className="text-sm cursor-pointer" onClick={() => handleComment(post.Id)}>View all comments</p>
+                                <p className="text-sm text-zinc-600">{post.postName}</p>
+                            </div>
+
                         </div>)
                 })}
                 {loading && <div className="h-10 w-full flex flex-col justify-center items-center"><DotSpinner size="1.5rem" color="#000000" /></div>}
