@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
+import { FiEdit, FiMessageCircle, FiMoreHorizontal, FiTrash2, FiX, FiLogOut, FiHeart, FiImage } from "react-icons/fi";
 
 export default function Profile() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL
@@ -12,20 +13,24 @@ export default function Profile() {
   const [userPost, setUserPost] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [Post, setPost] = useState();
-  const [ConfirmDlt, setConfirmDlt] = useState();
-  const [PostOption, setPostOption] = useState(false);
+  const [Post, setPost] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [postOption, setPostOption] = useState(false);
   const [Postloading, setPostloading] = useState(true);
   const [Comments, setComments] = useState([]);
-  const [Likeing, setLikeing] = useState(false);
   const [EditProfile, setEditProfile] = useState(false);
-  const [CommentsPostId, setCommentsPostId] = useState();
+  const [CommentsPostId, setCommentsPostId] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [folShow, setfolShow] = useState(false);
   const [folowdata, setfolowdata] = useState([]);
   const [suggession, setsuggession] = useState([]);
-  const [isunfollow, setisunfollow] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [followModalOpen, setFollowModalOpen] = useState(false);
+  const [followType, setFollowType] = useState("followers");
+  const [followLoadingId, setFollowLoadingId] = useState(null);
+
 
   const { register: registeComment, handleSubmit: submitComment, reset: resetComment, formState: { errors: errorsComment, isSubmitting: isSubmittingComment } } = useForm({
     defaultValues: { First_name: "", Email: "", bio: "", }
@@ -65,11 +70,6 @@ export default function Profile() {
         credentials: "include",
       });
 
-      if (!res.ok) {
-        navigate("/api/auth/login");
-        return;
-      }
-
       const result = await res.json();
       setData(result.data);
       setUserPost(result.userPost || []);
@@ -99,6 +99,7 @@ export default function Profile() {
 
     const comm = await com.json();
     const data = await res.json();
+    setPostloading(false)
     if (!comm.success) return;
     setComments(comm.comments);
     setCommentsPostId(postId)
@@ -106,7 +107,10 @@ export default function Profile() {
   }
 
   const handleLike = async (Id) => {
-    setLikeing(true)
+    if (likeLoading) return;
+
+    setLikeLoading(true);
+
     const res = await fetch(`${API_URL}/api/post/like`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -115,13 +119,16 @@ export default function Profile() {
     });
 
     const data = await res.json();
-    console.log("Liked data:", data);
 
-    if (!data.success) return;
-    setLikeing(false)
-    Post.isLike = !Post.isLike
-    Post.totalLikes = data.totalLikes
-    setPost(Post);
+    if (data.success) {
+      setPost(prev => ({
+        ...prev,
+        isLike: !prev.isLike,
+        totalLikes: data.totalLikes
+      }));
+    }
+
+    setLikeLoading(false);
   };
 
   const handleEditProfile = async (formData) => {
@@ -154,6 +161,7 @@ export default function Profile() {
   };
 
   const handleSubmitComment = async (d) => {
+    setCommentLoading(true)
 
     const res = await fetch(`${API_URL}/api/post/CreateComment`, {
       method: "POST",
@@ -167,16 +175,11 @@ export default function Profile() {
       }),
     });
 
-    if (!res.ok) {
-      const errorText = await res.json();
-      console.error("Server error:", errorText);
-      return;
-    }
-
     const data = await res.json();
     console.log("Response:", data);
 
     if (data.success) {
+      setCommentLoading(false)
       setComments((prev) => [data.comment, ...prev]);
       resetComment();
     }
@@ -187,7 +190,7 @@ export default function Profile() {
   };
 
   const remove = async (requestId, path) => {
-
+    setFollowLoadingId(requestId)
     const res = await fetch(`${API_URL}/api/follow/${path}`, {
       method: "POST",
       headers: {
@@ -210,62 +213,55 @@ export default function Profile() {
         return (prev.filter(u => u.Id !== requestId));
       });
     }
+    setFollowLoadingId(null)
 
   }
 
-  async function handleDelet() {
-    setPostOption(!PostOption)
-    setPost(!Post)
+  const handleDelet = async () => {
+    setDeleteLoading(true);
+
     const res = await fetch(`${API_URL}/api/post/delete`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ id: CommentsPostId }),
+      body: JSON.stringify({ id: Post.Id }),
     });
 
-    if (!res.ok) {
-      const errorText = await res.json();
-      console.error("Server error:", errorText);
-      return;
+    const data = await res.json();
+
+    if (data.success) {
+      setUserPost(prev =>
+        prev.filter(post => post.Id !== Post.Id)
+      );
+
+      setPost(null);
+      setDeleteConfirmOpen(false);
     }
-    console.log('dltted');
-    setUserPost(prev =>
-      prev.filter(post => post.Id !== CommentsPostId)
-    );
-    setPost(null);
-    setPostloading(false);
-    setPostOption(false);
-    setComments([]);
-    setConfirmDlt(false)
-    setCommentsPostId(null);
-    setPostloading(!Postloading)
-  }
+
+    setDeleteLoading(false);
+  };
 
   const FollowData = async (Id, which) => {
-    setLoading(true)
-    if (which == "following") {
-      setisunfollow(true)
-    } else {
-      setisunfollow(false)
-    }
+    setFollowType(which);
+    setFollowModalOpen(true);
+    setLoading(true);
 
     const res = await fetch(`${API_URL}/api/follow/getfollowData`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ Id, which }),
-    })
-    const result = await res.json()
+    });
+
+    const result = await res.json();
+
     if (result.Success) {
-      setfolShow(!folShow)
-      setfolowdata(result.data)
-      setsuggession(result.suggession)
+      setfolowdata(result.data);
+      setsuggession(result.suggession);
     }
-  }
+
+    setLoading(false);
+  };
 
   const otherUser = (userId, username) => {
     navigate(`/user?username=${username}&Id=${userId}`);
@@ -325,257 +321,354 @@ export default function Profile() {
   };
 
   return (
-    <main className="flex-1 flex justify-center px-2 overflow-y-auto h-screen">
-      <button onClick={() => Logout()} className="fixed right-3 top-2 text-2xl text-black a font-semibold">📤
-      </button>
-      {ConfirmDlt && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90">
-        <div className="w-[300px] bg-white p-5 rounded-xl flex justify-center items-center flex-col">
-          <p>Confirm to Delete Post</p>
-          <div className="flex justify-centet items-center gap-3">
-            <button className="text-white px-2 py-1 rounded-xl bg-blue-300 cursor-pointer border-black border-1 hover:bg-blue-400 hover:text-black" onClick={() => setConfirmDlt(false)}>Cancel</button>
-            <button className="text-white px-2 py-1 rounded-lg bg-red-300 cursor-pointer border-black border-1 hover:bg-red-400 hover:text-black" onClick={() => handleDelet()}>Delete</button>
-          </div>
+    <main className="flex-1 flex justify-center sm:px-6 bg-[#fafafa] min-h-screen w-full">
+
+      {Postloading && (
+        <div className="flex justify-center items-center fixed top-0 left-0 h-[100vh] w-[100vw] bg-black/70 z-9999">
+          <DotSpinner size="3rem" color="white" />
         </div>
-      </div>}
+      )}
 
-      {loading && <div className="fixed b-0 md:inset-0 h-[100vh] w-[100vw] bg-black/40 flex justify-center items-center z-90"><DotSpinner size="3.5rem" color="#044084" /></div>}
-      <div className="w-[100%] max-w-5xl bg-white rounded-xl md:px-4 py-4 flex flex-col gap-6">
+      <div className="w-full max-w-5xl bg-white rounded-xl px-2 sm:px-4 py-6 flex flex-col gap-8">
 
-        <div className="flex flex-col sm:flex-row gap-10 items-center sm:items-start">
+        <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 items-center sm:items-start">
 
-          <div className="w-32 h-32">
-            <img src={data?.image_src} alt="" className="bg-gradient-to-r from-pink-500 to-orange-400 w-full h-full rounded-full object-cover" />
+          <div className="w-28 h-28 sm:w-36 sm:h-36">
+            <img src={data?.image_src} alt="" className="w-full h-full rounded-full object-cover border border-gray-300" />
           </div>
 
-          <div className="flex-1 flex flex-col gap-2 items-center sm:items-start">
-            <p className="font-semibold text-lg">
-              {data?.Username}
-            </p>
+          <div className="flex-1 flex flex-col gap-4 items-center sm:items-start text-center sm:text-left">
 
-            <p className="text-xs text-gray-500">
-              {data?.First_name}
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+              <h2 className="text-lg sm:text-xl font-semibold">
+                {data?.Username}
+              </h2>
 
-            <div className="flex gap-4 text-sm text-gray-700">
+              <div className="flex gap-2">
+                <button onClick={() => setEditProfile(true)} className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md">
+                  <FiEdit size={14} />
+                  Edit
+                </button>
+
+                <button onClick={() => addMessage(data?.Id)} className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md">
+                  <FiMessageCircle size={14} />
+                  Message
+                </button>
+                <button onClick={Logout} className="flex items-center gap-1 px-3 py-1 text-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-md">
+                  <FiLogOut size={14} />
+                  Logout
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-6 text-sm">
               <span><b>{userPost.length}</b> posts</span>
-              <span onClick={() => FollowData(data.Id, "following")}><b>{following.length}</b> followers</span>
-              <span onClick={() => FollowData(data.Id, "followers")}><b>{followers.length}</b> following</span>
+
+              <span onClick={() => FollowData(data.Id, "following")} className="cursor-pointer hover:underline">
+                <b>{following.length}</b> following
+              </span>
+
+              <span onClick={() => FollowData(data.Id, "followers")} className="cursor-pointer hover:underline">
+                <b>{followers.length}</b> followers
+              </span>
             </div>
 
-            <p className="text-xs text-gray-500">
-              {data?.bio}
-            </p>
-
-            <div className="flex gap-3">
-              <button onClick={() => setEditProfile(!EditProfile)} className="px-4 py-1 text-sm border rounded-lg bg-zinc-100">Edit Profile</button>
-              <button onClick={() => addMessage(data?.Id)} className="px-4 py-1 text-sm border rounded-lg bg-zinc-100">Message</button>
+            <div>
+              <p className="font-medium">{data?.First_name}</p>
+              <p className="text-sm text-gray-600 break-words">
+                {data?.bio}
+              </p>
             </div>
+
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 border-t pt-4">
+        <div className="grid grid-cols-3 gap-[2px] sm:gap-1 border-t pt-4">
+
           {userPost.map((post) => (
-            <div key={post.Id} className="cursor-pointer bg-gradient-to-r from-zinc-100 to-zinc-200 rounded" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
+            <div key={post.Id} className="relative group cursor-pointer" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
               <img src={post.image_url} alt="post" className="w-full h-full object-cover" />
+
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-semibold transition">
+                <FiHeart className="mr-2" />
+                {post.totalLikes}
+              </div>
             </div>
           ))}
+
         </div>
       </div>
 
-      {EditProfile && <div className="fixed b-0 md:inset-0 bg-black/40 flex justify-center items-center z-90">
+      {Post && (
+        <div className="fixed z-9999999 inset-0 bg-black/70 flex justify-center items-baseline sm:items-center z-50 sm:p-2 sm:p-6">
 
-        <form onSubmit={handleSubmitEdit(handleEditProfile)} className="bg-white md:rounded-2xl shadow-xl p-5 h-[100vh] md:w-[60%] w-[100vw] md:h-[90vh]" >
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            Edit Profile
-          </h2>
+          <div className="bg-white flex flex-col md:flex-row w-full max-w-5xl h-[100vh] md:h-[85vh] sm:rounded-lg overflow-hidden relative">
 
-          <div className="flex items-center gap-4 mb-5">
-            <img src={imagePreview || data?.image_src} className="w-16 h-16 rounded-full border object-cover" />
-
-            <div className="flex items-center gap-4 mb-5">
-              <div>
-                <p className="font-semibold">{data?.Username}</p>
-
-                <label className="text-blue-500 cursor-pointer text-sm">
-                  Change Profile Photo
-                  <input type="file" hidden accept="image/*" onChange={handleImageChange} />
-                </label>
-
-                {errorsEdit.image && (<p className="text-red-500 text-xs ">{errorsEdit.image.message}</p>)}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Full Name</p>
-              <input type="text" {...registerEdit("First_name", { required: "Fullname is required", minLength: { value: 3, message: "Minimum 3 characters" }, maxLength: { value: 10, message: "Maximum 10 characters" }, })} className="w-full border rounded-lg px-3 py-2 outline-blue-400" />
-              {errorsEdit.First_name && (<p className="text-red-500 text-xs ">{errorsEdit.First_name.message}</p>)}
+            <div className="w-full md:w-1/2 bg-black flex justify-center items-center h-[40vh] sm:h-full sm:max-h-[30vh] md:max-h-full">
+              <img src={Post.image_url} alt="" className="w-full h-full object-contain" />
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Email</p>
-              <input type="email" {...registerEdit("Email", { required: "Email is required", pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email address", }, })} className="w-full border rounded-lg px-3 py-2 outline-blue-400" />
-              {errorsEdit.Email && (<p className="text-red-500 text-xs ">{errorsEdit.Email.message}</p>)}
-            </div>
+            <div className="w-full md:w-1/2 flex flex-col relative h-[54vh] sm:h-full">
 
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Bio</p>
-              <textarea {...registerEdit("bio", { maxLength: { value: 50, message: "Bio must not exceed 50 characters", }, })} rows={3} placeholder="Write about yourself..." className="w-full border rounded-lg px-3 py-2 outline-blue-400" />
-              {errorsEdit.bio && (<p className="text-red-500 text-xs ">{errorsEdit.bio.message}</p>)}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 mt-5">
-            <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-1 rounded-lg border">Cancel</button>
-            <button type="submit" disabled={isSubmittingEdit} className="px-5 py-1 bg-blue-500 text-white font-semibold rounded-lg">{isSubmittingEdit ? "Saving..." : "Save"}</button>
-          </div>
-        </form>
-
-      </div>}
-
-      {Postloading &&
-        <div className="fixed top-0 left-0 bg-[#00000087] flex justify-center sm:items-center items-baseline w-[100vw] h-[100vh]">
-          {Post ? <div className="bg-black shadow-xl flex justify-start items-center sm:w-[100vw] md:w-[70%] h-[88vh] sm:max-w-5xl flex-col md:flex-row overflow-hidden">
-            <div className="w-[100vw] h-[50vh] md:w-1/2 flex items-center justify-center md:max-h-[100vh]">
-              <img src={Post.image_url} alt="Post Not Found..." className="w-[100vw] max-h-[40vh] md:max-h-[100vh] object-contain" />
-            </div>
-
-            <p onClick={() => { setPost(), setPostloading() }} className="absolute top-5 right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
-
-            <div className="w-[100vw] md:w-1/2 flex flex-col bg-white h-full">
-              <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white z-10">
+              <div className="flex items-center justify-between px-4 py-3 border-b">
                 <div className="flex items-center gap-3">
                   <img src={Post.image_src} className="w-8 h-8 rounded-full object-cover" />
-                  <p className="font-semibold text-sm truncate max-w-[160px]">{Post.username}</p>
+                  <p className="font-semibold text-sm">{Post.username}</p>
                 </div>
-                <button onClick={() => setPostOption(true)} className="text-2xl leading-none">⋯</button>
+
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setPostOption(!postOption)}>
+                    <FiMoreHorizontal size={20} />
+                  </button>
+                  <button onClick={() => {
+                    setPost(null)
+                    setPostOption(false)
+                  }}>
+                    <FiX size={22} />
+                  </button>
+                </div>
               </div>
 
-              <div className="overflow-y-scroll h-[20vh] md:h-[51vh] px-4 py-3 text-sm">
-                {Comments.map(comment => {
-                  return (<div key={comment.Id || ''} className="w-[90%] flex flex-row gap-2">
-                    <p><img src={comment.image_src} alt="" className="size-7 rounded-[50%] object-cover" /></p>
-                    <div className="flex flex-col">
-                      <span className="flex items-center flex-row gap-5">
-                        <p>{comment.username}</p>
-                        <p className="text-zinc-600 text-sm">{TimeAgo(comment.created_at)}</p>
+              {postOption && (
+                <div className="absolute top-14 right-4 bg-white border shadow-md rounded-lg w-44 text-sm z-50">
+                  <button onClick={EditPost} className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 w-full">
+                    <FiEdit size={15} /> Edit
+                  </button>
+
+                  <button onClick={() => { setPostOption(false); setDeleteConfirmOpen(true); }} className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 text-red-500 w-full">
+                    <FiTrash2 size={15} /> {deleteLoading ? <DotSpinner size="1rem" /> : "Delete"}
+                  </button>
+
+                  <button onClick={() => {
+                    navigator.clipboard.writeText(Post.image_url);
+                    setPostOption(false);
+                  }} className="px-4 py-3 hover:bg-gray-100 w-full text-left">
+                    Copy link
+                  </button>
+                </div>
+              )}
+
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 text-sm">
+                {Comments.map((comment) => (
+                  <div key={comment.Id} className="flex gap-3">
+                    <img src={comment.image_src} className="w-7 h-7 rounded-full object-cover" />
+                    <div>
+                      <span className="font-semibold text-sm">
+                        {comment.username}
                       </span>
-                      <p className="w-[fit-content] comm p-2 text-sm text-gray-600 bg-zinc-100 rounded-lg leading-relaxed break-words line-clamp-[3.4]">
+                      <p className="text-gray-700 text-sm">
                         {comment.content}
                       </p>
+                      <span className="text-xs text-gray-400">
+                        {TimeAgo(comment.created_at)}
+                      </span>
                     </div>
-                  </div>)
-                })}
+                  </div>
+                ))}
               </div>
 
-              <div className="px-2 py-2 border-t">
-                <div className="flex flex-col gap-2 pl-3 items-center w-[fit-content]">
-                  <button className="h-[17px]" onClick={() => handleLike(Post.Id)}>
-                    {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
-                      <i className={`fa-heart ${Post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
-                    } </button>
-                  <span className="text-xs text-gray-500">{Post.totalLikes} Likes</span>
+              <div className="border-t px-4 py-3 flex flex-col gap-2 h-[4rem]">
+
+                <div className="flex items-center gap-4">
+                  <button onClick={() => handleLike(Post.Id)} disabled={likeLoading}>
+                    {likeLoading ? (
+                      <DotSpinner size="1rem" color="red" />
+                    ) : (
+                      <FiHeart
+                        size={22}
+                        className={`${Post.isLike ? "text-red-500 fill-red-500" : "text-black"}`}
+                      />
+                    )}
+                  </button>
                 </div>
+
+                <span className="text-sm font-semibold">
+                  {Post.totalLikes} likes
+                </span>
               </div>
 
-              <form onSubmit={submitComment(handleSubmitComment)} className="px-3 border-t py-2 flex items-center justify-between gap-2 sticky bottom-0 bg-white w-full" >
-                <div className="flex flex-col">
-                  <input type="text" placeholder="Add comment..." className="w-[280px] p-2 text-sm outline-none" {...registeComment("newComment", { required: "Comment is required", minLength: { value: 3, message: "Comment must be at least 3 characters" }, maxLength: { value: 200, message: "Comment must not exceed 200 characters" } })} />
-                  {errorsComment.newComment && (<span className="text-red-500 text-xs">{errorsComment.newComment.message}</span>)}
-                </div>
-                <button type="submit" disabled={isSubmittingComment} className="text-blue-500 font-semibold text-sm hover:underline">{isSubmittingComment ? "Posting..." : "Post"}</button>
+              <form onSubmit={submitComment(handleSubmitComment)} className="border-t px-4 py-3 flex items-center gap-3">
+
+                <input type="text" placeholder="Add a comment..." className="flex-1 outline-none text-sm"  {...registeComment("newComment", { required: "Comment required", minLength: { value: 2, message: "Too short" } })} />
+
+                <button type="submit" disabled={commentLoading} className="text-blue-500 font-semibold text-sm">
+                  {commentLoading ? (<div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>) : ("Post")}
+                </button>
+
               </form>
+
             </div>
-          </div> : <DotSpinner size="3rem" color="#ffffff" />}
-        </div>}
-
-      {PostOption &&
-        <div className="fixed flex h-[100vh] w-[100vw] inset-0 bg-black/50 items-center justify-center z-50">
-          <div className="bg-white w-[100%] md:h-[80vh] md:w-[40%] rounded-2xl overflow-hidden text-center">
-
-            <button onClick={() => DltPost()} className="cursor-pointer w-full py-3 text-sm cursor-pointer text-red-500 font-semibold border-b border-zinc-300">Delete</button>
-
-            <button onClick={() => EditPost()} className="cursor-pointer w-full py-3 text-sm cursor-pointer border-b border-zinc-300">Edit</button>
-
-            <button className="w-full py-3 cursor-not-allowed text-sm border-b border-zinc-300 hover:bg-gray-50">
-              Hide like count to others
-            </button>
-
-            <button className="w-full py-3 text-sm cursor-not-allowed border-b border-zinc-300 hover:bg-gray-50">
-              Turn off commenting
-            </button>
-
-            <button className="w-full py-3 text-sm cursor-not-allowed border-b border-zinc-300 hover:bg-gray-50">
-              Go to post
-            </button>
-
-            <button className="w-full py-3 text-sm cursor-not-allowed border-b border-zinc-300 hover:bg-gray-50">
-              Share to…
-            </button>
-
-            <button onClick={() => navigator.clipboard.writeText(Post.image_url)} className="w-full cursor-pointer py-3 text-sm border-b border-zinc-300 hover:bg-gray-50">
-              Copy link
-            </button>
-
-            <button className="w-full py-3 text-sm cursor-not-allowed border-b border-zinc-300 hover:bg-gray-50">
-              Embed
-            </button>
-
-            <button className="w-full py-3 text-sm cursor-not-allowed border-b border-zinc-300 hover:bg-gray-50">
-              About this account
-            </button>
-
-            <button onClick={() => setPostOption(!PostOption)} className="w-full cursor-pointer py-3 text-sm hover:bg-gray-100">
-              Cancel
-            </button>
-
           </div>
-        </div>}
+        </div>
+      )}
 
-      {folShow && <div className="fixed b-0 md:inset-0 h-[100vh] w-[100vw] bg-black/40 flex justify-center items-center z-90">
-        <p onClick={() => { setfolShow(!folShow), setfolowdata(), setsuggession(), setLoading(false) }} className="absolute top-2 right-2 md:top-5 md:right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
-        <div className="w-[100vw] h-[100vh] md:w-[45%] md:h-[67vh] div3 flex flex-col gap-6 overflow-hidden shadow-xl bg-white md:rounded-4xl">
-          <p className="w-[100%] py-1 pt-3 text-center border-b-1 border-solid border-gray-400">{!isunfollow ? "Following" : "Followers"}</p>
+      {EditProfile && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 px-3">
 
-          <div className="flex flex-col overflow-x-hidden overflow-y-scroll h-[86%]">
-            {folowdata.map((user, i) => {
-              return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
-                <div className="flex flex-row items-center w-[80%] gap-2">
-                  <img src={user.image_src} className="size-11 bg-gradient-to-r from-pink-500 to-orange-400 rounded-[50%] border-1 border-gray-400 object-cover" alt="" />
+          <form onSubmit={handleSubmitEdit(handleEditProfile)} className="bg-white w-full max-w-md rounded-2xl p-6 relative shadow-xl">
 
-                  <div className="flex items-center ws flex-col borde sm:items-center">
-                    <button onClick={() => otherUser(user.Id, user.Username)} className="cursor-pointer text-left">
-                      {user.Username}
-                      <p className="text-zinc-600 text-sm text-left">{user.First_name}</p>
+            <button type="button" onClick={() => setEditProfile(false)} className="absolute top-4 right-4">
+              <FiX size={20} />
+            </button>
+
+            <h2 className="text-lg font-semibold mb-6 text-center">
+              Edit Profile
+            </h2>
+
+            <div className="flex flex-row items-center gap-3 mb-6">
+              <div className="w-24 h-24 rounded-full overflow-hidden border">
+                <img src={imagePreview || data?.image_src} alt="" className="w-full h-full object-cover" />
+              </div>
+
+              <div className="flex flex-col">
+                <p className="font-semibold">{data?.Username}</p>
+
+                <label className="text-blue-500 text-sm cursor-pointer flex items-center gap-2">
+                  <FiImage size={16} />
+                  Change Photo
+                  <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+
+              <div>
+                <label className="text-sm text-gray-600">Full Name</label>
+                <input type="text"  {...registerEdit("First_name")} className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-300" />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Email</label>
+                <input type="email"  {...registerEdit("Email")} className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-300" />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Bio</label>
+                <textarea rows={3}  {...registerEdit("bio")} className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-300" />
+                <p className="text-xs text-gray-400 text-right">
+                  Max 100 characters
+                </p>
+              </div>
+
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+
+              <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-1 border rounded-md text-sm">
+                Cancel
+              </button>
+
+              <button type="submit" disabled={loading} className="px-5 py-1 bg-blue-500 text-white rounded-md text-sm font-semibold flex items-center gap-2">
+                {loading ? (<div className="w-4 h-4 border-2 border-blue-300 border-t-white rounded-full animate-spin"></div>) : ("Save")}
+              </button>
+
+            </div>
+
+          </form>
+        </div>
+      )}
+
+      {deleteConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+          <div className="bg-white w-full max-w-sm rounded-xl p-6 text-center shadow-lg">
+            <h2 className="text-lg font-semibold mb-2">Delete Post?</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              You are conferm to delete post.
+            </p>
+
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-1 border rounded-md text-sm">
+                Cancel
+              </button>
+
+              <button onClick={handleDelet} className="px-5 py-1 bg-red-500 text-white rounded-md text-sm font-semibold">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {followModalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 sm:px-3">
+
+          <div className="bg-white w-full max-w-md h-[90vh] sm:h-[80vh] rounded-xl overflow-hidden flex flex-col shadow-lg">
+
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <h2 className="font-semibold text-base">
+                {followType === "followers" ? "Followers" : "Following"}
+              </h2>
+
+              <button onClick={() => { setFollowModalOpen(false); setfolowdata([]); setsuggession([]); }}>
+                <FiX size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+
+              {folowdata.length === 0 ? (<p className="text-center text-gray-400 py-8 text-sm">No users found </p>) : (
+
+                folowdata.map((user) => (
+                  <div key={user.Id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"  >
+
+                    <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer"    >
+                      <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" />
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {user.Username}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {user.First_name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button onClick={() => remove(user.Id, followType === "followers" ? "remove" : "unfollow")} disabled={followLoadingId === user.Id} className={`px-3 py-1 text-xs rounded-md font-medium ${followType === "followers" ? "bg-gray-200 hover:bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}>
+                      {followLoadingId === user.Id ? (<div className="w-4 h-4 border-2 border-gray-400 border-t-black rounded-full animate-spin"></div>) : followType === "followers" ? ("Remove") : ("Following")}
                     </button>
-                  </div>
-                </div>
-                <button onClick={() => remove(user.Id, !isunfollow ? "unfollow" : "remove")} className="px-3 py-1 rounded-lg text-xs bg-zinc-200 text-zinc-700 hover:text-zinc-900 cursor-pointer">{!isunfollow ? "following" : "Remove"}</button>
-              </div>)
-            })}
 
-            <p className="p-1 border-b-1 py-2 border-sky-400 color text-sky-500">Suggestion</p>
-
-            {suggession.map((user, i) => {
-              return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
-                <div className=" flex flex-row items-center w-[80%] gap-2">
-                  <img src={user.image_src} className="rounded-[50%] bg-gradient-to-r from-pink-500 to-orange-400 border-1 border-gray-400 object-cover size-11" alt="" />
-                  <div className="flex items-center ws flex-col borde sm:items-center">
-                    <button onClick={() => otherUser(user.Id, user.Username)} className="cursor-pointer userOther">
-                      {user.Username}
-                      <p className="text-zinc-600 text-sm text-left">{user.First_name}</p>
-                    </button>
                   </div>
-                </div>
-                <button onClick={() => follow(user.Id, !isunfollow ? "unfollow" : "remove")} className="p-1 px-5 bg-sky-500 hover:bg-sky-700 cursor-pointer rounded-lg text-white">Follow</button>
-              </div>)
-            })}
+                ))
+              )}
+
+              {suggession && suggession.length > 0 && (
+                <>
+                  <div className="px-4 pt-6 pb-2 text-sm font-semibold text-gray-500">
+                    Suggestions for you
+                  </div>
+
+                  {suggession.map((user) => (
+                    <div key={user.Id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+
+                      <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer">
+                        <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" />
+                        <div>
+                          <p className="text-sm font-semibold">
+                            {user.Username}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {user.First_name}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button onClick={() => follow(user.Id)} disabled={followLoadingId === user.Id} className="px-3 py-1 text-xs rounded-md bg-blue-500 text-white hover:bg-blue-600">
+                        {followLoadingId === user.Id ? (<div className="w-4 h-4 border-2 border-blue-300 border-t-white rounded-full animate-spin"></div>) : ("Follow")}
+                      </button>
+
+                    </div>
+                  ))}
+                </>
+              )}
+
+            </div>
 
           </div>
         </div>
-      </div>}
-
+      )}
     </main>
   );
+
+
 }

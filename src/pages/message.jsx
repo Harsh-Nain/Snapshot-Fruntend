@@ -20,6 +20,7 @@ export default function Messages() {
   const [previewImage, setPreviewImage] = useState(null);
 
   const [user, setUser] = useState(null);
+  const [newuser, setNewUser] = useState(null);
   const [currentId, setCurrentId] = useState(null);
 
   const [users, setUsers] = useState([]);
@@ -34,6 +35,7 @@ export default function Messages() {
   const [loading, setLoading] = useState(false);
   const [LoadMess, setLoadMess] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [query, setQuery] = useState("");
   const [page, setpage] = useState(2);
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
@@ -99,10 +101,6 @@ export default function Messages() {
         return sender ? [sender, ...rest] : updated;
       });
 
-      if (Number(data.FromId) === Number(openChatId)) {
-        setMessages((prev) => [...prev, data]);
-      }
-
       fetchUsers();
     });
 
@@ -132,15 +130,19 @@ export default function Messages() {
       });
     });
 
-
+    let typingTimeout;
 
     socketRef.current.on("typing", (data) => {
-      console.log(data);
-
       if (Number(data.FromId) === Number(openChatId)) {
-        setTyping(true)
+        setTyping(true);
+
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          setTyping(false);
+        }, 2000);
       }
     });
+
 
     return () => socketRef.current.disconnect();
   }, [currentId, openChatId]);
@@ -299,7 +301,6 @@ export default function Messages() {
     setActiveMsgId(prev => (prev === id ? null : id));
   };
 
-
   const formatLastTime = (time) => {
     if (!time) return "";
 
@@ -318,6 +319,51 @@ export default function Messages() {
     });
   };
 
+  // useEffect(() => {
+  //   if (query.trim().length < 1) {
+  //     setUsers(newuser);
+  //     return;
+  //   }
+  //   setNewUser(users);
+
+  //   const timer = setTimeout(() => {
+
+  //     const filtered = newuser.filter((u) =>
+  //       u.Username.toLowerCase().includes(query.toLowerCase())
+  //     );
+
+  //     setUsers(filtered);
+
+  //   }, 300);
+
+  //   return () => clearTimeout(timer);
+
+  // }, [query]);
+
+  const clearChat = async (id) => {
+    const res = await fetch(`${API_URL}/api/message/clearchat`, {
+      credentials: "include",
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      if (openChat == id) return setMessages([])
+    }
+  }
+
+  const clearUser = async (id) => {
+    const res = await fetch(`${API_URL}/api/message/clearuser?id=${id}`, {
+      credentials: "include",
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+    }
+  }
+
   return (
     <div className="flex w-full h-[88vh] sm:h-screen bg-white overflow-hidden">
 
@@ -334,24 +380,16 @@ export default function Messages() {
           <div className="px-4">
             <div className="flex items-center bg-gray-100 rounded-full px-3">
               <FiSearch />
-              <input placeholder="Search" className="bg-transparent px-2 py-2 outline-none w-full" />
+              <input placeholder="Search" value={query} onChange={(e) => setQuery(e.target.value)} className="bg-transparent px-2 py-2 outline-none w-full" />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto mt-4 px-2">
 
-            {users.map((u) => (
-              <button
-                key={u.Id}
-                onClick={() => openChat(u)}
-                className="relative w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition"
-              >
+            {users && users.map((u) => (
+              <button key={u.Id} onClick={() => openChat(u)} className="relative w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition" >
                 <div className="relative shrink-0">
-                  <img
-                    src={u.image_src}
-                    alt={u.Username}
-                    className="w-11 h-11 rounded-full object-cover"
-                  />
+                  <img src={u.image_src} alt={u.Username} className="w-11 h-11 rounded-full object-cover" />
 
                   {u.isOnline && (
                     <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
@@ -430,7 +468,7 @@ export default function Messages() {
                     <p className="text-xs">{selectedUser.First_name}</p>
                   </div>
                 </div>
-                <FiMoreVertical />
+                <FiMoreVertical onClick={() => clearUser(openChatId)} />
               </div>
 
               <div ref={MessContainer} className="flex-1 overflow-y-auto p-4 space-y-3">

@@ -135,7 +135,7 @@ export default function Home() {
 
         const result = await res.json();
         if (result.success) {
-            setIsMessaged(pre => [...pre, requestId])
+            setIsMessaged((prev) => [...prev, requestId]);
         }
     }
 
@@ -226,154 +226,215 @@ export default function Home() {
     }
 
     return (
-        <div className="flex flex-col sm:flex-row justify-around w-full h-[88vh] md:h-[100vh]">
-            <span className="sm:hidden text-2xl font-[cursive] tracking-tight text-sky-400 px-2 pt-3 pb-1">Snapshot</span>
+        <div className="flex flex-col z sm:flex-row justify-center w-full h-[88vh] md:h-[100vh] bg-[#fafafa]">
 
-            <div ref={postContainer} className="sm:p-0 sm:w-[100%] md:w-1/2  flex flex-col overflow-y-scroll overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-5 h-[88vh] md:h-[100vh]">
-                {posts.map((post, i) => {
-                    return (
-                        <div key={i} className="flex flex-col gap-2 w-full mt-5 sm:px-3">
+            <span className="text-3xl sm:hidden font-black pl-3 font-normal tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+                Snapshot
+            </span>
 
-                            <div className="flex items-center gap-3 px-3 sm:p-0">
-                                <button className="cursor-pointer flex items-center gap-2" onClick={() => otherUser(post.userId, post.username)}>
-                                    <img src={post.image_src} alt="user" className="size-9 rounded-full object-cover bg-gradient-to-r from-sky-500 to-violate-400 border-1 border-zinc-100" />
+            <div className="w-full sm:w-[600px] flex justify-center">
 
-                                    <p className="flex flex-col text-left">
-                                        <span>{post.username}</span>
-                                        <span className="text-xs px-1">{post.desc}</span>
-                                    </p>
+                <div ref={postContainer} className="w-full max-w-[630px] h-[82vh] md:h-[100vh] overflow-y-auto py-6 space-y-6 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]" >
+
+                    {posts.map((post, i) => (
+                        <div key={i} className="bg-white border border-gray-200 rounded-md">
+
+                            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+                                <button onClick={() => otherUser(post.userId, post.username)} className="flex items-center gap-3">
+                                    <img src={post.image_src} alt="user" className="w-8 h-8 rounded-full object-cover border border-gray-300" />
+                                    <div className="text-left">
+                                        <p className="font-semibold text-sm text-black">
+                                            {post.username}
+                                        </p>
+                                        <p className="text-xs text-gray-500 truncate max-w-[200px]">
+                                            {post.desc}
+                                        </p>
+                                    </div>
                                 </button>
                             </div>
 
-                            <div className="relative w-full overflow-hidden sm:border border-zinc-200 dark:border-zinc-800 sm:rounded md:h-[87vh] bg-black">
-                                {post.songUrl &&
-                                    <button onClick={(e) => playSong(e, post.Id)} className="cursor-pointer absolute bottom-3 right-3 z-20 bg-black/50 text-white w-6 h-6 rounded-full flex items-center justify-center">
-                                        {isPlay ? <IoVolumeHigh /> : < IoVolumeMute />}
-                                        {post.songUrl && <audio src={post.songUrl}></audio>}
-                                    </button>}
-                                <img src={post.image_url} alt="post" className="w-full h-full object-contain" />
-                            </div>
-                            <div className="flex flex-row px-3 gap-2 sm:p-0">
-                                <div className="flex flex-col gap-2 items-center w-[fit-content]">
-                                    <button className="h-[17px]" onClick={() => handleLike(post.Id)}>
-                                        {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
-                                            <i className={`fa-heart ${post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
-                                        } </button>
-                                    <span className="text-xs text-gray-500">{formatCount(post.totalLikes)} Likes</span>
-                                </div>
+                            <div className="relative w-full bg-black flex justify-center">
+                                <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
 
-                                <div className="cursor-pointer pt-[4px]">
-                                    <button className="h-[17px]" onClick={() => handleComment(post.Id)}>
-                                        {Commenting ? <DotSpinner size="1rem" color="#777777" /> :
-                                            <span className="flex gap-2"><svg aria-label="Comment" fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
-                                                <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" />
-                                            </svg> <span className="text-sm text-gray-800">{post.commentCount > 1 && formatCount(post.commentCount)}</span></span>
-                                        } </button>
-                                </div>
+                                {post.songUrl && (
+                                    <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">
+                                        {isPlay ? <IoVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
+                                        <audio src={post.songUrl}></audio>
+                                    </button>
+                                )}
                             </div>
 
-                            <div className="px-3 sm:p-0">
-                                <p className="text-sm cursor-pointer" onClick={() => handleComment(post.Id, "all")}>View all comments </p>
-                                <p className="text-sm text-zinc-600">{post.postName}</p>
+                            <div className="px-4 pt-3 flex items-center gap-5">
+
+                                <button onClick={() => handleLike(post.Id)} className="transition hover:scale-110 active:scale-95" >
+                                    {Likeing ? (<DotSpinner size="1rem" color="#ef4444" />) : (
+                                        <i className={`fa-heart ${post.isLike ? "fa-solid text-red-500" : "fa-regular text-black"} text-[1.6rem]`}></i>
+                                    )}
+                                </button>
+
+                                <button onClick={() => handleComment(post.Id)} className="text-black transition hover:scale-110 active:scale-95">
+                                    {Commenting ? (<DotSpinner size="1rem" color="black" />) : (
+                                        <svg fill="currentColor" height="24" viewBox="0 0 24 24" width="24"> <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" /></svg>
+                                    )}
+                                </button>
                             </div>
 
-                        </div>)
-                })}
-                {loading && <div className="h-10 w-full flex flex-col justify-center items-center"><DotSpinner size="1.5rem" color="#000000" /></div>}
+                            <div className="px-4 pt-2">
+                                <p className="text-sm font-semibold text-black">
+                                    {formatCount(post.totalLikes)} likes
+                                </p>
+                            </div>
+
+                            <div className="px-4 pt-1 pb-4 text-sm">
+                                <span className="font-semibold text-black mr-2">
+                                    {post.username}
+                                </span>
+                                <span className="text-gray-700">
+                                    {post.postName}
+                                </span>
+
+                                <p onClick={() => handleComment(post.Id, "all")} className="text-gray-500 mt-1 cursor-pointer hover:text-gray-700">
+                                    View all {formatCount(post.commentCount)} comments
+                                </p>
+                            </div>
+
+                        </div>
+                    ))}
+
+                    {loading && (
+                        <div className="flex justify-center py-6">
+                            <DotSpinner size="1.5rem" color="black" />
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="hidden md:block now text-sm mt-10 xl:pr-10  text-gray-700 nowuser flex justify-center xl:w-1/3 w-2/5">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <img src={user && user.image_src} className="w-12 h-12 rounded-full border object-cover" />
-                        <div>
-                            <NavLink to="/api/profile" className="text-black a font-semibold">
-                                <p className="overflow-hidden">{user && user.Username}</p>
-                            </NavLink>
-                            <p className="text-gray-500">{user && user.First_name}</p>
-                        </div>
-                    </div>
-                    <button className="text-blue-500">Switch</button>
-                </div>
+            <div className="hidden md:block w-[320px] ml-10">
 
-                <div className="flex justify-between mt-6 mb-3">
-                    <p className="text-gray-500">Suggested for you</p>
-                </div>
+                <div className="sticky top-20 space-y-6">
 
-                {suggession && <div className="flex flex-col overflow-x-hidden overflow-y-scroll h-[44vh]">
-                    {suggession.map((user, i) => {
-                        return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
-                            <div className="flex flex-row items-center w-[80%] gap-2">
-                                <img src={user.image_src} className="rounded-[50%] border-1 border-gray-400 object-cover size-11" alt="" />
-                                <div className="flex items-center ws flex-col borde sm:items-center">
-                                    <button onClick={() => otherUser(user.Id, user.Username)} className="text-left cursor-pointer userOther">
-                                        {user.Username}
-                                        <p className="text-zinc-600 text-sm text-left">{user.First_name}</p>
-                                    </button>
-                                </div>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <img src={user?.image_src} className="w-12 h-12 rounded-full object-cover" alt="" />
+
+                            <div>
+                                <NavLink to="/api/profile" className="font-semibold text-sm text-black">
+                                    {user?.Username}
+                                </NavLink>
+
+                                <p className="text-sm text-gray-500">
+                                    {user?.First_name}
+                                </p>
                             </div>
-                            <button onClick={() => IsMessaged.includes(user.Id) ? addMessage(user.Id) : follow(user.Id)} className="p-1 px-5 bg-sky-500 hover:bg-sky-700 cursor-pointer rounded-lg text-white">{IsMessaged.includes(user.Id) ? "Message" : "Follow"}</button>
-                        </div>)
-                    })}
-                </div>}
+                        </div>
 
-                <div className="text-gray-500 text-xs mt-6 space-x-2 leading-6">
-                    <span>About</span> ·
-                    <span>Help</span> ·
-                    <span>Press</span> ·
-                    <span>API</span> ·
-                    <span>Jobs</span> ·
-                    <span>Privacy</span> ·
-                    <span>Terms</span> ·
-                    <span>Locations</span> ·
-                    <span>Language</span> ·
-                    <span>Nain Verified</span>
+                        <button className="text-sm font-semibold text-blue-500 hover:text-blue-600">
+                            Switch
+                        </button>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-500 font-medium">
+                            Suggested for you
+                        </p>
+
+                        <button className="text-xs font-semibold text-black hover:text-gray-600">
+                            See All
+                        </button>
+                    </div>
+
+                    <div className="space-y-4 max-h-[45vh] overflow-y-auto pr-1">
+
+                        {suggession?.map((sugUser, i) => (
+                            <div key={i} className="flex items-center justify-between">
+
+                                <div className="flex items-center gap-3">
+                                    <img src={sugUser.image_src} className="w-8 h-8 rounded-full object-cover" alt="" />
+
+                                    <div>
+                                        <button onClick={() => otherUser(sugUser.Id, sugUser.Username)} className="text-sm font-semibold text-black text-left">
+                                            {sugUser.Username}
+                                        </button>
+
+                                        <p className="text-xs text-gray-500">
+                                            {sugUser.First_name}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button onClick={() => IsMessaged.includes(sugUser.Id) ? addMessage(sugUser.Id) : follow(sugUser.Id)} className="text-xs font-semibold text-blue-500 hover:text-blue-600">
+                                    {IsMessaged.includes(sugUser.Id) ? "Message" : "Follow"}
+                                </button>
+                            </div>
+                        ))}
+
+                    </div>
+
+                    <p className="text-xs text-gray-400 pt-6">
+                        © 2026 SNAPSHOT FROM NAIN
+                    </p>
+
                 </div>
-
-                <p className="text-gray-500 text-xs mt-4">
-                    © 2026 SNAPSHOT FROM NAIN
-                </p>
-
             </div>
 
             {showComments && (
-                <div className="fixed w-[100vw] bottom-[15vh] md:bottom-0 left-0 h-[40vh] md:h-[100vh] z-1000 bg-[#00000082] flex justify-center items-center">
-                    <p onClick={() => closeComment()} className="absolute -top-17 md:top-5 right-1 md:right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
+                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50">
 
-                    <div className="w-[100vw] md:w-[60vw] md:h-[81vh] overflow-hidden rounded-sm flex flex-col items-center bg-white">
-                        <form onSubmit={handleSubmit(handleSubmitComment)} className="w-[92%] p-2 flex flex-col rounded-xl mt-3 bg-zinc-100" >
+                    <div className="absolute inset-0" onClick={() => closeComment()} />
 
-                            <div className="flex flex-col h-[47px]">
-                                <input type="text" placeholder="Add comment..." className="w-full p-2 text-sm outline-none rounded" {...register("newComment", { required: "Comment is required", minLength: { value: 3, message: "Comment must be at least 3 characters" }, maxLength: { value: 200, message: "Comment must not exceed 200 characters" } })} />
-                                {errors.newComment && (<span className="text-red-500 text-xs">{errors.newComment.message}</span>)}
-                            </div>
-                            <button type="submit" disabled={isSubmitting} className="mt-2 px-3 py-1 rounded-xl bg-orange-600 text-sm w-fit text-white hover:bg-orange-700 disabled:opacity-50">{isSubmitting ? "Submitting..." : "Submit"}</button>
+                    <div className="relative w-full md:w-[600px] h-[75vh] md:h-[80vh] bg-white rounded-t-2xl md:rounded-md border border-gray-200 flex flex-col">
+
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+                            <h2 className="font-semibold text-black text-base">
+                                Comments
+                            </h2>
+                            <button onClick={() => closeComment()} className="text-black text-lg hover:text-gray-600"> ✕</button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+
+                            {Comments.map((comment, i) => (
+                                <div key={i} className="flex gap-3">
+
+                                    <img src={comment.image_src} alt="" className="w-8 h-8 rounded-full object-cover" />
+
+                                    <div className="flex flex-col text-sm">
+
+                                        <span className="font-semibold text-black">
+                                            {comment.username}
+                                        </span>
+
+                                        <span className="text-gray-800 break-words">
+                                            {comment.content}
+                                        </span>
+
+                                        <span className="text-xs text-gray-400 mt-1">
+                                            {TimeAgo(comment.created_at)}
+                                        </span>
+
+                                    </div>
+                                </div>
+                            ))}
+
+                        </div>
+
+                        <form onSubmit={handleSubmit(handleSubmitComment)} className="border-t border-gray-200 px-4 py-3 flex items-center gap-3">
+
+                            <input type="text" placeholder="Add a comment..." className="flex-1 text-sm outline-none border-none bg-transparent" {...register("newComment", { required: "Comment is required", minLength: { value: 3, message: "Min 3 characters" }, maxLength: { value: 200, message: "Max 200 characters" }, })} />
+
+                            <button type="submit" disabled={isSubmitting} className="text-blue-500 font-semibold text-sm disabled:opacity-50">
+                                {isSubmitting ? (<DotSpinner size="1rem" color="black" />) : ("Post")}
+                            </button>
+
                         </form>
 
-                        <div className="w-[100%] gap-3 mt-2">
-                            <p className="px-7">Comments -</p>
-                            <div className="w-[100%] overflow-y-scroll h-75 scrl overflow-x-hidden gap-3 px-1 py-2 flex flex-col items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" id="commentsDiv">
+                        {errors.newComment && (<p className="text-red-500 text-xs px-5 pb-3">    {errors.newComment.message}</p>)}
 
-                                {Comments.map(comment => {
-                                    return (<div key={comment.Id || ''} className="w-[90%] flex flex-row gap-2">
-                                        <p><img src={comment.image_src} alt="" class="size-7 rounded-[50%] object-cover" /></p>
-                                        <div className="flex flex-col">
-                                            <span className="flex items-center flex-row gap-5">
-                                                <p>{comment.username}</p>
-                                                <p className="text-zinc-600 text-sm">{TimeAgo(comment.created_at)}</p>
-                                            </span>
-                                            <p className="w-[fit-content] comm p-2 text-sm text-gray-600 bg-zinc-100 rounded-lg leading-relaxed break-words line-clamp-[3.4]">
-                                                {comment.content}
-                                            </p>
-                                        </div>
-                                    </div>)
-                                })}
-                            </div>
-                        </div>
                     </div>
-
                 </div>
             )}
+
         </div>
+
     )
 }

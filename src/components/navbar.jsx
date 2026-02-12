@@ -67,125 +67,100 @@ export default function Navbar() {
     return (
         <>
             {isDesktop && (
-                <aside className="w-[250px] h-screen sticky top-0 flex flex-col  justify-between px-3 py-4 border-r bg-white">
-                    <div className="flex flex-col gap-1">
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-6">
-                            <span className="text-2xl font-[cursive] tracking-tight text-sky-400">Snapshot</span>
+                <aside className="w-[250px] sticky top-0 h-[100vh] flex flex-col justify-between px-6 py-8 bg-white border-r border-gray-200">
+
+                    <div className="flex flex-col gap-2">
+
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-8">
+                            <span className="text-3xl font-black font-normal tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+                                Snapshot
+                            </span>
+
                         </NavLink>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition  ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}             >
                             {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
-                            <span className="text-sm">Home</span>
+                            <span>Home</span>
                         </NavLink>
 
-                        <button onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex cursor-pointer items-center gap-4 px-3 py-3 rounded-lg transition ${isSearchOpen ? "bg-green-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                        <button onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition${isSearchOpen ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`} >
                             <SearchOutline />
-                            <span className="text-sm">Search</span>
+                            <span>Search</span>
                         </button>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}>
                             <CreateOutline />
-                            <span className="text-sm">Create</span>
+                            <span>Create</span>
                         </NavLink>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition   ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}                 >
                             <MessageOutline />
-                            <span className="text-sm">Messages</span>
+                            <span>Messages</span>
                         </NavLink>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                            <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
-                            <span className="text-sm">Profile</span>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}              >
+                            <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full object-cover" alt="" />
+                            <span>Profile</span>
                         </NavLink>
+
                     </div>
 
-                    <button onClick={Logout} className="flex items-center gap-4 px-3 py-3 rounded-lg transition hover:bg-zinc-100" >
+                    <button onClick={Logout} className="flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-red-500 transition">
                         <LogoutOutline />
-                        <span className="text-sm">Logout</span>
+                        <span>Logout</span>
                     </button>
+
                 </aside>
             )}
 
             {isSearchOpen && (
-                <>
-                    <div className="fixed h-[90vh] md:h-[100vh] top-0 md:left-[213px] z-50 w-full md:w-[420px] h-screen bg-white md:rounded-3xl shadow-xl flex flex-col">
+                <div className="fixed md:left-[250px] z-50 w-full md:w-[400px] h-screen bg-white border-l border-gray-200 flex flex-col">
 
-                        <div className="p-4 border-b">
-                            <h2 className="font-semibold text-lg mb-3">Search</h2>
-                            <div className="flex items-center gap-2 bg-zinc-100 rounded-lg px-3 py-2">
-                                <SearchOutline className="text-zinc-400" />
-                                <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" className="w-full bg-transparent outline-none text-sm" />
-                                {query && (
-                                    <button onClick={() => setQuery("")}>
-                                        <ClearIcon />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
+                    <div className="p-5 border-b border-gray-200">
+                        <h2 className="font-semibold text-lg mb-4 text-black">Search</h2>
 
-                        <div className="flex-1 overflow-y-auto">
-                            {loading && (
-                                <p className="text-center text-sm text-zinc-500 mt-6">
-                                    Searching…
-                                </p>
-                            )}
+                        <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
+                            <SearchOutline className="text-gray-500" />
 
-                            {!loading && users.length === 0 && query.length >= 2 && (
-                                <p className="text-center text-sm text-zinc-500 mt-6">
-                                    No results found
-                                </p>
-                            )}
+                            <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search users..." className="w-full bg-transparent outline-none text-sm text-black" />
 
-                            {users.map((user) => (
-                                <div key={user.Id} onClick={() => navigate(`/user?username=${user.Username}&Id=${user.Id}`)} className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-zinc-100">
-                                    <img src={user.image_src} onClick={() => setIsSearchOpen(false)} className="w-10 h-10 rounded-full object-cover" alt="" />
-
-                                    <div className="leading-tight" onClick={() => setIsSearchOpen(false)}>
-                                        <p className="text-sm font-semibold">
-                                            {user.Username}
-                                        </p>
-                                        <p className="text-xs text-zinc-500">
-                                            {user.First_name}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {(users.length < 1 && !query) && (
-                                <p className="flex justify-center items-center text-center text-sm text-zinc-500 mt-6 h-[60vh]">
-                                    Start typing a username to <br /> search for users...
-                                </p>
-                            )}
-
+                            {query && (<button onClick={() => setQuery("")}><ClearIcon /></button>)}
                         </div>
                     </div>
-                </>
+
+                    <div className="flex-1 overflow-y-auto">
+                        {users.map((user) => (
+                            <div key={user.Id} onClick={() => { setIsSearchOpen(false); navigate(`/user?username=${user.Username}&Id=${user.Id}`); }} className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-100 transition">
+                                <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" alt="" />
+
+                                <div>
+                                    <p className="text-sm font-semibold text-black">{user.Username}</p>
+                                    <p className="text-xs text-gray-500">{user.First_name}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             )}
 
             {!isDesktop && (
-                <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t flex justify-around py-2 z-999999999">
+                <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex justify-around py-3 z-9999">
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        {location.pathname === "/" ? <HomeFilled /> : <HomeOutline />}
-                    </NavLink>
+                    {[
+                        { to: "/", icon: location.pathname === "/" ? <HomeFilled /> : <HomeOutline /> },
+                        { to: "/api/post/post", icon: <CreateOutline /> },
+                        { to: "/api/message/message", icon: <MessageOutline /> },
+                        { to: "/api/profile", icon: (<img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full object-cover" alt="" />) }
+                    ].map((item, index) => (
+                        <NavLink key={index} onClick={() => setIsSearchOpen(false)} to={item.to} className={({ isActive }) => `flex items-center justify-center p-3 transition ${isActive ? "text-black" : "text-gray-500"}`}>
+                            {item.icon}
+                        </NavLink>
+                    ))}
 
-                    <NavLink onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex items-center gap-4 px-3 py-3 rounded-lg transition ${isSearchOpen ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <SearchOutline />
-                    </NavLink>
+                    <button onClick={() => setIsSearchOpen(!isSearchOpen)} className={`flex items-center justify-center p-3 transition ${isSearchOpen ? "text-black" : "text-gray-500"}`}><SearchOutline /></button>
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <CreateOutline />
-                    </NavLink>
+                </nav>)}
 
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <MessageOutline />
-                    </NavLink>
-
-                    <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-3 py-3 rounded-lg transition ${isActive ? "bg-sky-100 font-semibold" : "hover:bg-zinc-100"}`}>
-                        <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full" alt="" />
-                    </NavLink>
-                </nav>
-            )}
         </>
     );
 }

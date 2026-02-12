@@ -1,158 +1,171 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import DotSpinner from "../components/dot-spinner-anim";
 import { useForm } from "react-hook-form";
+import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck } from "react-icons/fi";
 import { TimeAgo } from "../components/agotime";
+import DotSpinner from "../components/dot-spinner-anim";
 
 export default function OtherUser() {
-    const API_URL = import.meta.env.VITE_BACKEND_API_URL
+    const API_URL = import.meta.env.VITE_BACKEND_API_URL;
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
     const userId = searchParams.get("Id");
     const username = searchParams.get("username");
 
-    const navigate = useNavigate();
-
     const [data, setData] = useState(null);
     const [userPost, setUserPost] = useState([]);
-    const [follower, setFollower] = useState([]);
+    const [followers, setFollowers] = useState([]);
     const [following, setFollowing] = useState([]);
-    const [isFollowing, setIsFollowing] = useState();
-    const [loading, setLoading] = useState(false);
-
-    const [Post, setPost] = useState();
-    const [Postloading, setPostloading] = useState(false);
-    const [Comments, setComments] = useState([]);
-    const [Likeing, setLikeing] = useState(false);
-    const [CommentsPostId, setCommentsPostId] = useState();
-    const [folShow, setfolShow] = useState(false);
-    const [folowdata, setfolowdata] = useState([]);
     const [suggession, setsuggession] = useState([]);
-    const [isunfollow, setisunfollow] = useState(false);
-    const [followLoading, setfollowLoading] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [Postloading, setPostloading] = useState(false);
 
-    const { register: registeComment, handleSubmit: submitComment, reset: resetComment, formState: { errors: errorsComment, isSubmitting: isSubmittingComment } } = useForm({
-        defaultValues: { First_name: "", Email: "", bio: "", }
-    });
+    const [followModalOpen, setFollowModalOpen] = useState(false);
+    const [followType, setFollowType] = useState("followers");
+
+    const [Post, setPost] = useState(null);
+    const [Comments, setComments] = useState([]);
+    const [likeLoading, setLikeLoading] = useState(false);
+    const [commentLoading, setCommentLoading] = useState(false);
+
+    const { register, handleSubmit, reset } = useForm();
 
     useEffect(() => {
-        if (!userId || !username) return;
+        if (!userId) return;
 
-        const controller = new AbortController();
-        setLoading(true)
-
-        const fetchProfile = async () => {
-
+        const loadProfile = async () => {
             const res = await fetch(`${API_URL}/api/auth/userProfile`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, userId }),
-                signal: controller.signal,
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, username }),
             });
 
-            if (res.status === 401) {
-                navigate("/api/auth/login")
-                return;
+            const re = await fetch(`${API_URL}/api/follow/getfollowData`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ userId }),
+            });
+
+            const resut = await re.json();
+
+            if (resut.Success) {
+                setsuggession(resut.suggession);
             }
 
             const result = await res.json();
 
-            if (result.redirect) {
-                navigate(result.redirect);
-                return;
-            }
-
             setData(result.data);
-            setLoading(false)
             setUserPost(result.userPost || []);
-            setFollower(result.follower || []);
+            setFollowers(result.follower || []);
             setFollowing(result.following || []);
             setIsFollowing(result.isfollowing);
         };
 
-        fetchProfile();
+        loadProfile();
+    }, [userId]);
 
-        return () => controller.abort();
-    }, [userId, username, navigate]);
+    const toggleFollow = async () => {
+        const path = isFollowing ? "unfollow" : "request";
 
-    const handleSubmitComment = async (d) => {
-
-        const res = await fetch(`${API_URL}/api/post/CreateComment`, {
+        await fetch(`${API_URL}/api/follow/${path}`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
             credentials: "include",
-            body: JSON.stringify({
-                postId: CommentsPostId,
-                Comment: d.newComment,
-            }),
-        });
-
-        if (!res.ok) {
-            const errorText = await res.json();
-            console.error("Server error:", errorText);
-            return;
-        }
-
-        const data = await res.json();
-        console.log("Response:", data);
-
-        if (data.success) {
-            setComments((prev) => [data.comment, ...prev]);
-            resetComment();
-        }
-    };
-
-    const handleLike = async (Id) => {
-        setLikeing(true)
-        const res = await fetch(`${API_URL}/api/post/like`, {
-            method: "POST",
             headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ postid: Id }),
+            body: JSON.stringify({ requestId: data.Id }),
         });
 
-        const data = await res.json();
-        console.log("Liked data:", data);
-
-        if (!data.success) return;
-        setLikeing(false)
-        Post.isLike = !Post.isLike
-        Post.totalLikes = data.totalLikes
-        setPost(Post);
+        setIsFollowing(!isFollowing);
     };
 
     const showImage = async (postId) => {
         setPostloading(true)
         const res = await fetch(`${API_URL}/api/post/onePost`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             credentials: "include",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ postId }),
         });
+
+        const post = await res.json();
+        setPost(post);
+        setPostloading(false)
 
         const com = await fetch(`${API_URL}/api/post/postcomment`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             credentials: "include",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ postId }),
         });
 
-        const comm = await com.json();
+        const comments = await com.json();
+        setComments(comments.comments || []);
+    };
+
+    const handleLike = async () => {
+        if (!Post) return;
+
+        setLikeLoading(true);
+
+        const res = await fetch(`${API_URL}/api/post/like`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postid: Post.Id }),
+        });
+
         const data = await res.json();
-        if (!comm.success) return;
-        setComments(comm.comments);
-        setCommentsPostId(postId)
-        setPost(data)
+
+        setPost(prev => ({
+            ...prev,
+            isLike: !prev.isLike,
+            totalLikes: data.totalLikes
+        }));
+
+        setLikeLoading(false);
+    };
+
+    const onSubmitComment = async (form) => {
+        if (!Post) return;
+
+        setCommentLoading(true);
+
+        const res = await fetch(`${API_URL}/api/post/CreateComment`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                postId: Post.Id,
+                Comment: form.comment,
+            }),
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            setComments(prev => [result.comment, ...prev]);
+            reset();
+        }
+
+        setCommentLoading(false);
+    };
+
+    const addMessage = async (toMessId) => {
+
+        const res = await fetch(`${API_URL}/api/message/message?toMessId=${toMessId}`, {
+            method: "GET",
+            credentials: "include",
+        });
+
+        const result = await res.json();
+        if (result.success) {
+            navigate(result.redirect)
+        }
     }
 
     const follow = async (requestId) => {
-        console.log(requestId);
-
-        setfollowLoading(true)
 
         const res = await fetch(`${API_URL}/api/follow/request`, {
             method: "POST",
@@ -165,218 +178,195 @@ export default function OtherUser() {
 
         const result = await res.json();
         if (result.success) {
-            setIsFollowing(true)
-            setfollowLoading(false)
-        }
-    }
-
-    const unfollow = async (requestId) => {
-        setfollowLoading(true)
-
-        const res = await fetch(`${API_URL}/api/follow/unfollow`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ requestId }),
-        });
-
-        const result = await res.json();
-        if (result.success) {
-            setIsFollowing(false)
-            setfollowLoading(false)
-        }
-    }
-
-    const FollowData = async (Id, which) => {
-        setLoading(true)
-        if (which == "following") {
-            setisunfollow(true)
-        } else {
-            setisunfollow(false)
-        }
-
-        const res = await fetch(`${API_URL}/api/follow/getfollowData`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ Id, which }),
-        })
-        const result = await res.json()
-        if (result.Success) {
-            setfolShow(!folShow)
-            setfolowdata(result.data)
-            setsuggession(result.suggession)
+            setsuggession(prev => prev.filter(u => u.Id !== requestId))
         }
     }
 
     const otherUser = (userId, username) => {
-        setfolShow(!folShow)
-        setLoading(!loading)
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
-    const addMessage = async (toMessId) => {
-
-        const res = await fetch(`${API_URL}/api/message/message?toMessId=${toMessId}`, {
-            credentials: "include",
-        });
-
-        const result = await res.json();
-        if (result.success) {
-            navigate(result.redirect)
-        }
-    }
-
     return (
-        <main className="flex-1 flex justify-center px-2 overflow-y-auto h-screen">
+        <main className="flex justify-center bg-[#fafafa] min-h-screen sm:p-4">
 
-            {loading && <div className="fixed b-0 md:inset-0 bg-black/40 w-full h-[100vh] flex justify-center items-center z-90"><DotSpinner size="3.5rem" color="#000000" /></div>}
+            <div className="w-full max-w-5xl bg-white rounded-xl p-6">
 
-            <div className="w-full max-w-5xl bg-white rounded-xl p-4 flex flex-col gap-6">
-
-                <div className="flex flex-col sm:flex-row gap-10 items-center sm:items-start">
-                    <div className="w-32 h-32">
-                        <img src={data?.image_src} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                {Postloading && (
+                    <div className="flex justify-center items-center fixed top-0 left-0 h-[100vh] w-[100vw] bg-black/70 z-9999">
+                        <DotSpinner size="3rem" color="white" />
                     </div>
+                )}
 
-                    <div className="flex-1 flex flex-col gap-2 items-center sm:items-start">
-                        <p className="font-semibold text-lg">
-                            {data?.Username}
-                        </p>
+                <div className="flex flex-col sm:flex-row gap-10">
 
-                        <p className="text-xs text-gray-500">
-                            {data?.First_name}
-                        </p>
+                    <img src={data?.image_src} className="w-32 h-32 rounded-full object-cover" />
 
-                        <div className="flex gap-4 text-sm text-gray-700">
+                    <div className="flex flex-col gap-4">
+
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-xl font-semibold">{data?.Username}</h2>
+
+                            <div className="flex items-center gap-3">
+                                <button onClick={toggleFollow} className={`px-4 py-1 rounded-md text-sm flex items-center gap-2 transition   ${isFollowing ? "bg-gray-200 hover:bg-gray-300" : "bg-blue-500 hover:bg-blue-600 text-white"}`}                            >
+                                    {isFollowing ? <FiUserCheck size={16} /> : <FiUserPlus size={16} />}
+                                    {isFollowing ? "Following" : "Follow"}
+                                </button>
+
+                                {isFollowing && (
+                                    <button onClick={() => addMessage(data?.Id)} className="px-4 py-1 rounded-md text-sm border border-gray-300 bg-white hover:bg-gray-100 transition">
+                                        Message
+                                    </button>
+                                )}
+
+                            </div>
+
+                        </div>
+
+                        <div className="flex gap-6 text-sm">
                             <span><b>{userPost.length}</b> posts</span>
-                            <span onClick={() => FollowData(data.Id, "following")}><b>{following.length}</b> followers</span>
-                            <span onClick={() => FollowData(data.Id, "followers")}><b>{follower.length}</b> following</span>
+
+                            <span className="cursor-pointer" onClick={() => { setFollowType("followers"); setFollowModalOpen(true); }}>
+                                <b>{followers.length}</b> followers
+                            </span>
+
+                            <span className="cursor-pointer" onClick={() => { setFollowType("following"); setFollowModalOpen(true); }}>
+                                <b>{following.length}</b> following
+                            </span>
                         </div>
 
-                        <p className="text-xs text-gray-500">
-                            {data?.bio}
-                        </p>
-
-                        <div className="flex gap-3">
-                            <button onClick={() => isFollowing ? unfollow(data?.Id) : follow(data?.Id)} className={`px-4 py-1 cursor-pointer text-sm border rounded-lg 
-                            ${!isFollowing ? "bg-blue-400 hover:bg-blue-500 border-white text-white" : "bg-zinc-100 hover:bg-zinc-200"}`}>
-                                {followLoading ? <DotSpinner size="1rem" color="#ffbb00" /> : `${isFollowing ? "Unfollow" : "follow"}`}</button>
-
-                            {isFollowing && <button onClick={() => addMessage(data?.Id)} className="px-4 py-1 text-sm border rounded-lg bg-zinc-100 hover:bg-zinc-200">Message</button>}
-                        </div>
+                        <p className="text-sm">{data?.bio}</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 border-t pt-4">
-                    {userPost.map((post) => (
-                        <div key={post.Id} className="cursor-pointer" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
-                            <img src={post.image_url} alt="post" className="w-full h-full object-cover" />
+                <div className="grid grid-cols-3 gap-1 mt-8">
+                    {userPost.map(post => (
+                        <div key={post.Id} onClick={() => showImage(post.Id)} className="cursor-pointer" style={{ aspectRatio: "1/1" }}>
+                            <img src={post.image_url} className="w-full h-full object-cover" />
                         </div>
                     ))}
                 </div>
+
             </div>
 
-            {Postloading && <div className="fixed top-0 left-0 bg-[#00000087] flex justify-center sm:items-center items-baseline w-[100vw] h-[100vh]">
-                {Post ? <div className="bg-black shadow-xl flex justify-start items-center w-[100vw] md:w-[70%] h-[88vh] sm:h-[80vh] sm:max-w-5xl flex flex-col md:flex-row overflow-hidden">
-                    <div className="h-[40vh] w-[100vw] md:w-1/2 bg-black flex items-center justify-center md:max-h-[100vh]">
-                        <img src={Post.image_url} alt="Post Not Found..." className="w-full max-h-[50vh] md:max-h-[100vh] object-contain" />
-                    </div>
+            {Post && (
+                <div className="fixed inset-0 bg-black/70 flex justify-center items:baseline sm:items-center z-50 sm:p-4 z-9999">
 
-                    <p onClick={() => { setPost(), setPostloading() }} className="absolute top-5 right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
+                    <div className="bg-white w-full max-w-4xl flex flex-col md:flex-row h-[100vh] md:h-[85vh] rounded-lg overflow-hidden">
 
-                    <div className="w-full md:w-1/2 flex flex-col bg-white h-full">
-                        <div className="flex items-center justify-between px-4 py-3 border-b sticky top-0 bg-white z-10">
-                            <div className="flex items-center gap-3">
-                                <img src={Post.image_src} className="w-8 h-8 rounded-full object-cover" />
-                                <p className="font-semibold text-sm truncate max-w-[160px]">{Post.username}</p>
-                            </div>
+                        <div className="md:w-1/2 bg-black flex items-center h-[40vh]  sm:max-h-[30vh] justify-center">
+                            <img src={Post.image_url} className="object-contain max-h-full" />
                         </div>
 
-                        <div className="overflow-y-scroll h-[20vh] md:h-[51vh] px-4 py-3 text-sm">
-                            {Comments.map(comment => {
-                                return (<div key={comment.Id || ''} className="w-[90%] flex flex-row gap-2">
-                                    <p><img src={comment.image_src} alt="" className="size-7 rounded-[50%] object-cover" /></p>
-                                    <div className="flex flex-col">
-                                        <span className="flex items-center flex-row gap-5">
-                                            <p>{comment.username}</p>
-                                            <p className="text-zinc-600 text-sm">{TimeAgo(comment.created_at)}</p>
-                                        </span>
-                                        <p className="w-[fit-content] comm p-2 text-sm text-gray-600 bg-zinc-100 rounded-lg leading-relaxed break-words line-clamp-[3.4]">
-                                            {comment.content}
-                                        </p>
+                        <div className="md:w-1/2 flex flex-col h-[54vh] sm:h-full">
+
+                            <div className="flex justify-between items-center p-4 border-b">
+                                <p className="font-semibold">{Post.username}</p>
+                                <FiX size={22} onClick={() => setPost(null)} className="cursor-pointer" />
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                {Comments.map(comment => (
+                                    <div key={comment.Id} className="flex gap-3">
+                                        <img src={comment.image_src} className="w-7 h-7 rounded-full object-cover" />
+                                        <div>
+                                            <span className="font-semibold text-sm">
+                                                {comment.username}
+                                            </span>
+                                            <p className="text-gray-700 text-sm">
+                                                {comment.content}
+                                            </p>
+                                            <span className="text-xs text-gray-400">
+                                                {TimeAgo(comment.created_at)}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>)
-                            })}
-                        </div>
-
-                        <div className="px-2 py-2 border-t">
-                            <div className="flex flex-col gap-2 pl-3 items-center w-[fit-content]">
-                                <button className="h-[17px]" onClick={() => handleLike(Post.Id)}>
-                                    {Likeing ? <DotSpinner size="1rem" color="#ff1d1d" /> :
-                                        <i className={`fa-heart ${Post.isLike ? "fa-solid" : "fa-regular"} fa-lg cursor-pointer text-red-500`}></i>
-                                    } </button>
-                                <span className="text-xs text-gray-500">{Post.totalLikes} Likes</span>
+                                ))}
                             </div>
-                        </div>
 
-                        <form onSubmit={submitComment(handleSubmitComment)} className="px-3 border-t py-2 flex items-center justify-between gap-2 sticky bottom-0 bg-white w-full" >
-                            <div className="flex flex-col">
-                                <input type="text" placeholder="Add comment..." className="w-[280px] p-2 text-sm outline-none" {...registeComment("newComment", { required: "Comment is required", minLength: { value: 3, message: "Comment must be at least 3 characters" }, maxLength: { value: 200, message: "Comment must not exceed 200 characters" } })} />
-                                {errorsComment.newComment && (<span className="text-red-500 text-xs">{errorsComment.newComment.message}</span>)}
-                            </div>
-                            <button type="submit" disabled={isSubmittingComment} className="text-blue-500 font-semibold text-sm hover:underline">{isSubmittingComment ? "Posting..." : "Post"}</button>
-                        </form>
-                    </div>
-                </div> : <DotSpinner size="3rem" color="#000000" />}
-            </div>}
+                            <div className="border-t p-4">
 
-            {folShow && <div className="fixed b-0 md:inset-0 h-[100vh] w-[100vw] bg-black/40 flex justify-center items-center z-90">
-                <p onClick={() => { setfolShow(!folShow), setfolowdata(), setsuggession(), setLoading(false) }} className="absolute top-2 right-2 md:top-5 md:right-7 cursor-pointer"><i className="fa-solid fa-xmark fa-2xl text-red-500"></i></p>
-                <div className="w-[100vw] h-[100vh] md:w-[45%] md:h-[67vh] flex flex-col gap-6 overflow-hidden shadow-xl bg-white md:rounded-4xl">
-                    <p className="w-[100%] py-1 pt-3 text-center border-b-1 border-solid border-gray-400">{!isunfollow ? "Following" : "Followers"}</p>
-
-                    <div className="flex flex-col overflow-x-hidden overflow-y-scroll h-[86%]">
-                        {folowdata.map((user, i) => {
-                            return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
-                                <div className="flex flex-row items-center w-[80%] gap-2">
-                                    <img src={user.image_src} className="size-11 rounded-[50%] border-1 border-gray-400 object-cover" alt="" />
-
-                                    <div className="flex items-center ws flex-col borde sm:items-center">
-                                        <button onClick={() => otherUser(user.Id, user.Username)} className="cursor-pointer text-left">
-                                            {user.Username}
-                                            <p className="text-zinc-600 text-sm text-left">{user.First_name}</p>
-                                        </button>
-                                    </div>
+                                <div className="flex items-center gap-4 mb-2">
+                                    <button onClick={handleLike}>
+                                        {likeLoading ? <DotSpinner size="1rem" color="red" /> : <FiHeart size={22} className={Post.isLike ? "text-red-500 fill-red-500" : ""} />}
+                                    </button>
+                                    <FiMessageCircle size={22} />
                                 </div>
-                            </div>)
-                        })}
 
-                        <p className="p-1 border-b-1 py-2 border-sky-400 color text-sky-500">Suggestion</p>
+                                <p className="text-sm font-semibold">
+                                    {Post.totalLikes} likes
+                                </p>
 
-                        {suggession.map((user, i) => {
-                            return (<div key={i} className="flex flex-row px-2 p-2 items-center rounded-lg gap-5 w-[100%]">
-                                <div className=" flex flex-row items-center w-[80%] gap-2">
-                                    <img src={user.image_src} className="rounded-[50%] border-1 border-gray-400 object-cover size-11" alt="" />
-                                    <div className="flex items-center ws flex-col borde sm:items-center">
-                                        <button onClick={() => otherUser(user.Id, user.Username)} className="cursor-pointer userOther">
-                                            {user.Username}
-                                            <p className="text-zinc-600 text-sm text-left">{user.First_name}</p>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button onClick={() => follow(user.Id, !isunfollow ? "unfollow" : "remove")} className="p-1 px-5 bg-sky-500 hover:bg-sky-700 cursor-pointer rounded-lg text-white">Follow</button>
-                            </div>)
-                        })}
+                                <form onSubmit={handleSubmit(onSubmitComment)} className="flex gap-2 mt-3">
+                                    <input        {...register("comment", { required: true })} className="flex-1 border px-3 py-1 rounded-md text-sm" placeholder="Add a comment..." />
+                                    <button disabled={commentLoading} className="text-blue-500 font-semibold text-sm"    >
+                                        {commentLoading ? <DotSpinner size="1rem" color="skyblue" /> : "Post"}
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
 
                     </div>
                 </div>
-            </div>}
+            )}
 
-        </main >
+            {followModalOpen && (
+                <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 sm:p-4">
+
+                    <div className="bg-white w-full max-w-md h-[85vh] rounded-xl flex flex-col">
+
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h2 className="font-semibold">
+                                {followType === "followers" ? "Followers" : "Following"}
+                            </h2>
+                            <FiX size={20} onClick={() => setFollowModalOpen(false)} className="cursor-pointer" />
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto">
+                            {(followType === "followers" ? followers : following).map(user => (
+                                <div key={user.Id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                                    <img src={user.image_src} className="w-9 h-9 rounded-full object-cover" />
+                                    <div>
+                                        <p className="text-sm font-semibold">{user.Username}</p>
+                                        <p className="text-xs text-gray-500">{user.First_name}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            {suggession && suggession.length > 0 && (
+                                <>
+                                    <div className="px-4 pt-6 pb-2 text-sm font-semibold text-gray-500">
+                                        Suggestions for you
+                                    </div>
+
+                                    {suggession.map((user) => (
+                                        <div key={user.Id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+
+                                            <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer">
+                                                <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" />
+                                                <div>
+                                                    <p className="text-sm font-semibold">
+                                                        {user.Username}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {user.First_name}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <button onClick={() => follow(user.Id)} className="px-3 py-1 text-xs rounded-md bg-blue-500 text-white hover:bg-blue-600">
+                                                Follow
+                                            </button>
+
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+
+                    </div>
+                </div>
+            )}
+
+        </main>
     );
 }
