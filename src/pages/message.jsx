@@ -16,6 +16,7 @@ export default function Messages() {
   const [activeUserOption, setActiveUserOption] = useState(null);
   const [confirmChatDelete, setConfirmChatDelete] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
+  const [loadDlt, setloadDlt] = useState(false);
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
 
@@ -33,8 +34,7 @@ export default function Messages() {
   const [loading, setLoading] = useState(false);
   const [LoadMess, setLoadMess] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [page, setpage] = useState(2);
-  const pageRef = useRef(1);
+  const pageRef = useRef(2);
   const loadingRef = useRef(false);
   const noMoreRef = useRef(false);
 
@@ -269,6 +269,7 @@ export default function Messages() {
   }, [query, allUsers]);
 
   const ClearChat = async (id) => {
+    setloadDlt(true)
     const res = await fetch(`${API_URL}/api/message/clearchat?id=${id}`, { credentials: "include", });
     const result = await res.json();
 
@@ -278,6 +279,7 @@ export default function Messages() {
       setSelectedUser(null)
       setUsers(pre => pre.filter(user => user.Id !== id))
     }
+    setloadDlt(false)
   }
 
   return (
@@ -474,7 +476,7 @@ export default function Messages() {
                         </button>
 
                         <button onClick={() => ClearChat(confirmChatDelete)} className="px-4 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600">
-                          Delete
+                          {loadDlt ? <DotSpinner size="1rem" color="white" /> : "Delete"}
                         </button>
                       </div>
                     </div>
@@ -575,9 +577,13 @@ export default function Messages() {
                   </label>
 
                   <input id="file" type="file" hidden multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={(e) => setFiles([...e.target.files])} />
-                  <input value={message} onChange={handleTyping} placeholder={LoadMess ? "Sending..." : "Message..."} className="flex-1 bg-gray-100 px-4 py-2 rounded-full outline-none" />
+                  <input value={message} onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault(); sendMessage();
+                    }
+                  }} onChange={handleTyping} placeholder={LoadMess ? "Sending..." : "Message..."} className="flex-1 bg-gray-100 px-4 py-2 rounded-full outline-none" />
 
-                  <button onClick={sendMessage} disabled={sending} className={`p-2 rounded-full ${sending ? "text-gray-400" : "bg-gradient-to-r from-pink-500 to-orange-400 text-white"}`}>{LoadMess ? <DotSpinner size="1rem" color="#ffbb00" /> : <FiSend />}
+                  <button onClick={sendMessage} disabled={sending} className={`p-2 rounded-full ${sending ? "text-gray-400" : "bg-gradient-to-r from-sky-500 to-voilate-400 text-white"}`}>{LoadMess ? <DotSpinner size="1rem" color="white" /> : <FiSend />}
                   </button>
                 </div>
               </div>

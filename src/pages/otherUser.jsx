@@ -35,6 +35,8 @@ export default function OtherUser() {
         if (!userId) return;
 
         const loadProfile = async () => {
+            console.log('okmdivonfgbhifkjdvnfjkjdsfvnidj');
+
             const res = await fetch(`${API_URL}/api/auth/userProfile`, {
                 method: "POST",
                 credentials: "include",
@@ -56,6 +58,7 @@ export default function OtherUser() {
             }
 
             const result = await res.json();
+            console.log('isFollowing', result.isfollowing);
 
             setData(result.data);
             setUserPost(result.userPost || []);

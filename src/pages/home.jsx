@@ -44,11 +44,7 @@ export default function Home() {
 
             const data = await res.json();
             console.log("Dashboard data:", data);
-            console.log(data);
-            let d = data.data
-            if (d.length = 0) {
-                navigate("/api/auth/login")
-            }
+
             setsuggession(data.suggsionId)
 
             setPosts(data.post || []);
