@@ -109,7 +109,10 @@ export default function CreatePost() {
   }, [imagePreview, audioUrl]);
 
   return (
-    <div className="w-full min-h-screen bg-[#fafafa] flex items-center justify-center px-4 py-10">
+    <div className="w-full min-h-screen bg-[#fafafa] flex items-baseline ms:items-center justify-center ms:px-4 ms:py-10 z-9999">
+
+
+      <div className="absolute inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/")} size="2rem" /></div>
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -117,8 +120,8 @@ export default function CreatePost() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
-        <label className="w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center cursor-pointer relative group">
+      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white sm:rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
+        <label className="w-full lg:w-1/2 h-[40vh] sm:h-full aspect-square bg-gray-100 flex items-center justify-center cursor-pointer relative group">
 
           {!imagePreview ? (
             <div className="text-center text-gray-400 group-hover:text-gray-600 transition">
@@ -135,11 +138,8 @@ export default function CreatePost() {
           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </label>
 
-        <div className="w-full lg:w-1/2 p-8 flex flex-col gap-6">
-
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-sky-500 to-yellow-500 bg-clip-text text-transparent">
-            Create Post
-          </h2>
+        <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col gap-4 sm:gap-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-sky-500 to-yellow-500 bg-clip-text text-transparent">Create Post</h2>
 
           <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-red-400 focus:border-yellow-400 outline-none" />
           <textarea rows={3} placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-red-400 border focus:border-yellow-400 outline-none" />
@@ -160,18 +160,19 @@ export default function CreatePost() {
           <button type="submit" className="py-3 rounded-full font-semibold text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 transition">
             Share Post
           </button>
+
         </div>
       </form>
 
       {openMusic && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black/60 w-full h-[100vh] flex items-center justify-center z-50 px-4 z-9999999999">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 space-y-6 relative">
 
             <button onClick={() => setOpenMusic(false)} className="absolute top-4 right-4 text-gray-400 hover:text-black">
               <FiX />
             </button>
 
-            <h3 className="text-xl font-bold text-center">   Add Music </h3>
+            <h3 className="text-xl font-bold text-center">Add Music</h3>
 
             <div className="flex justify-center gap-3 text-sm">
               {["upload", "url", "search"].map((tab) => (
