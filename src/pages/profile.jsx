@@ -31,7 +31,6 @@ export default function Profile() {
   const [followType, setFollowType] = useState("followers");
   const [followLoadingId, setFollowLoadingId] = useState(null);
 
-
   const { register: registeComment, handleSubmit: submitComment, reset: resetComment, formState: { errors: errorsComment, isSubmitting: isSubmittingComment } } = useForm({
     defaultValues: { First_name: "", Email: "", bio: "", }
   });
@@ -71,6 +70,8 @@ export default function Profile() {
       });
 
       const result = await res.json();
+      console.log(result);
+
       setData(result.data);
       setUserPost(result.userPost || []);
       setFollowers(result.follower || []);
@@ -224,20 +225,16 @@ export default function Profile() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ id: Post.Id }),
+      body: JSON.stringify({ id: deleteConfirmOpen }),
     });
 
-    const data = await res.json();
+    await res.json();
 
-    if (data.success) {
-      setUserPost(prev =>
-        prev.filter(post => post.Id !== Post.Id)
-      );
-
-      setPost(null);
-      setDeleteConfirmOpen(false);
-    }
-
+    setUserPost(prev =>
+      prev.filter(post => post.Id !== Post.Id)
+    );
+    setPost(null);
+    setDeleteConfirmOpen(false);
     setDeleteLoading(false);
   };
 
@@ -334,7 +331,7 @@ export default function Profile() {
         <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 items-center sm:items-start">
 
           <div className="w-28 h-28 sm:w-36 sm:h-36">
-            <img src={data?.image_src} alt="" className="w-full h-full rounded-full object-cover border border-gray-300" />
+            <img src={data?.image_src} alt="" className="w-full h-full bg-sky-100 rounded-full object-cover border border-gray-300" />
           </div>
 
           <div className="flex-1 flex flex-col gap-4 items-center sm:items-start text-center sm:text-left">
@@ -365,11 +362,12 @@ export default function Profile() {
               <span><b>{userPost.length}</b> posts</span>
 
               <span onClick={() => FollowData(data.Id, "following")} className="cursor-pointer hover:underline">
-                <b>{following.length}</b> following
+
+                <b>{following.length}</b> followers
               </span>
 
               <span onClick={() => FollowData(data.Id, "followers")} className="cursor-pointer hover:underline">
-                <b>{followers.length}</b> followers
+                <b>{followers.length}</b> following
               </span>
             </div>
 
@@ -387,7 +385,7 @@ export default function Profile() {
 
           {userPost.map((post) => (
             <div key={post.Id} className="relative group cursor-pointer" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
-              <img src={post.image_url} alt="post" className="w-full h-full object-cover" />
+              <img src={post.image_url} alt="post" className="w-full bg-sky-100 h-full object-cover" />
 
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-semibold transition">
                 <FiHeart className="mr-2" />
@@ -395,8 +393,27 @@ export default function Profile() {
               </div>
             </div>
           ))}
-
         </div>
+
+        {userPost.length === 0 && (
+          <div className="flex flex-col items-center w-full justify-center py-20 text-center">
+
+            <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 border-gray-300 mb-4">
+              <FiImage size={36} className="text-gray-400" />
+            </div>
+
+            <h3 className="text-lg font-semibold text-gray-800">
+              No Posts Yet
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2 max-w-xs">
+              When {data?.Username || "this user"} shares photos or videos,
+              they’ll appear here.
+            </p>
+
+          </div>
+        )}
+
       </div>
 
       {Post && (
@@ -412,7 +429,7 @@ export default function Profile() {
 
               <div className="flex items-center justify-between px-4 py-3 border-b">
                 <div className="flex items-center gap-3">
-                  <img src={Post.image_src} className="w-8 h-8 rounded-full object-cover" />
+                  <img src={Post.image_src} className="w-8 h-8 bg-sky-100 rounded-full object-cover" />
                   <p className="font-semibold text-sm">{Post.username}</p>
                 </div>
 
@@ -435,8 +452,8 @@ export default function Profile() {
                     <FiEdit size={15} /> Edit
                   </button>
 
-                  <button onClick={() => { setPostOption(false); setDeleteConfirmOpen(true); }} className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 text-red-500 w-full">
-                    <FiTrash2 size={15} /> {deleteLoading ? <DotSpinner size="1rem" /> : "Delete"}
+                  <button onClick={() => { setPostOption(null); setDeleteConfirmOpen(Post.Id); }} className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 text-red-500 w-full">
+                    <FiTrash2 size={15} /> {deleteLoading ? <DotSpinner size="1rem" color="white" /> : "Delete"}
                   </button>
 
                   <button onClick={() => {
@@ -451,7 +468,7 @@ export default function Profile() {
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 text-sm">
                 {Comments.map((comment) => (
                   <div key={comment.Id} className="flex gap-3">
-                    <img src={comment.image_src} className="w-7 h-7 rounded-full object-cover" />
+                    <img src={comment.image_src} className="w-7 h-7 bg-sky-100 rounded-full object-cover" />
                     <div>
                       <span className="font-semibold text-sm">
                         {comment.username}
@@ -465,6 +482,24 @@ export default function Profile() {
                     </div>
                   </div>
                 ))}
+
+                {Comments.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+
+                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                      <FiMessageCircle size={28} className="text-gray-400" />
+                    </div>
+
+                    <h3 className="text-base font-semibold text-gray-800">
+                      Start the conversation
+                    </h3>
+
+                    <p className="text-sm text-gray-500 mt-1">
+                      Share your thoughts about this post.
+                    </p>
+
+                  </div>
+                )}
               </div>
 
               <div className="border-t px-4 py-3 flex flex-col gap-2 h-[4rem]">
@@ -517,7 +552,7 @@ export default function Profile() {
 
             <div className="flex flex-row items-center gap-3 mb-6">
               <div className="w-24 h-24 rounded-full overflow-hidden border">
-                <img src={imagePreview || data?.image_src} alt="" className="w-full h-full object-cover" />
+                <img src={imagePreview || data?.image_src} alt="" className="w-full bg-sky-100 h-full object-cover" />
               </div>
 
               <div className="flex flex-col">
@@ -570,7 +605,7 @@ export default function Profile() {
       )}
 
       {deleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 z-99999999999999">
           <div className="bg-white w-full max-w-sm rounded-xl p-6 text-center shadow-lg">
             <h2 className="text-lg font-semibold mb-2">Delete Post?</h2>
             <p className="text-sm text-gray-500 mb-6">
@@ -597,7 +632,7 @@ export default function Profile() {
 
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <h2 className="font-semibold text-base">
-                {followType === "followers" ? "Followers" : "Following"}
+                {followType !== "followers" ? "Followers" : "Following"}
               </h2>
 
               <button onClick={() => { setFollowModalOpen(false); setfolowdata([]); setsuggession([]); }}>
@@ -613,7 +648,7 @@ export default function Profile() {
                   <div key={user.Id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"  >
 
                     <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer"    >
-                      <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" />
+                      <img src={user.image_src} className="w-10 h-10 bg-sky-100  rounded-full object-cover" />
                       <div>
                         <p className="text-sm font-semibold">
                           {user.Username}
@@ -624,8 +659,8 @@ export default function Profile() {
                       </div>
                     </div>
 
-                    <button onClick={() => remove(user.Id, followType === "followers" ? "remove" : "unfollow")} disabled={followLoadingId === user.Id} className={`px-3 py-1 text-xs rounded-md font-medium ${followType === "followers" ? "bg-gray-200 hover:bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}>
-                      {followLoadingId === user.Id ? (<div className="w-4 h-4 border-2 border-gray-400 border-t-black rounded-full animate-spin"></div>) : followType === "followers" ? ("Remove") : ("Following")}
+                    <button onClick={() => remove(user.Id, followType !== "followers" ? "remove" : "unfollow")} disabled={followLoadingId === user.Id} className={`px-3 py-1 text-xs rounded-md font-medium ${followType === "followers" ? "bg-gray-200 hover:bg-gray-300" : "bg-gray-200 hover:bg-gray-300"}`}>
+                      {followLoadingId === user.Id ? (<div className="w-4 h-4 border-2 border-gray-400 border-t-black rounded-full animate-spin"></div>) : followType !== "followers" ? ("Remove") : ("Following")}
                     </button>
 
                   </div>
@@ -642,7 +677,7 @@ export default function Profile() {
                     <div key={user.Id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
 
                       <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer">
-                        <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" />
+                        <img src={user.image_src} className="w-10 h-10 bg-sky-100 rounded-full object-cover" />
                         <div>
                           <p className="text-sm font-semibold">
                             {user.Username}

@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { FiCopy, FiTrash2, FiMoreHorizontal } from "react-icons/fi";
+import { FiCopy, FiTrash2 } from "react-icons/fi";
 import { io } from "socket.io-client";
-import {
-  FiSend,
-  FiPaperclip,
-  FiArrowLeft,
-  FiSearch,
-  FiMoreVertical,
-} from "react-icons/fi";
+import { FiSend, FiPaperclip, FiArrowLeft, FiSearch, FiMoreVertical, FiMessageCircle } from "react-icons/fi";
+
 import { OnTime } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import "../App.css";
@@ -18,12 +13,15 @@ export default function Messages() {
   const [activeMsgId, setActiveMsgId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [activeUserOption, setActiveUserOption] = useState(null);
+  const [confirmChatDelete, setConfirmChatDelete] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [query, setQuery] = useState("");
 
   const [user, setUser] = useState(null);
-  const [newuser, setNewUser] = useState(null);
   const [currentId, setCurrentId] = useState(null);
 
-  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openChatId, setOpenChatId] = useState(null);
 
@@ -35,12 +33,10 @@ export default function Messages() {
   const [loading, setLoading] = useState(false);
   const [LoadMess, setLoadMess] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [query, setQuery] = useState("");
   const [page, setpage] = useState(2);
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
   const noMoreRef = useRef(false);
-
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [showChat, setShowChat] = useState(false);
@@ -51,20 +47,12 @@ export default function Messages() {
   const MessContainer = useRef()
 
   const deleteMessage = async (msgId) => {
-    await fetch(`${API_URL}/api/message/unSend?messid=${msgId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    await fetch(`${API_URL}/api/message/unSend?messid=${msgId}`, { method: "DELETE", credentials: "include", });
 
     setMessages((prev) => prev.filter((m) => m.Id !== msgId));
     setConfirmDeleteId(null);
 
-    socketRef.current.emit("deleteMess", {
-      to: openChatId,
-      Id: msgId,
-      message: "Message has been deleted",
-      FromId: currentId
-    });
+    socketRef.current.emit("deleteMess", { to: openChatId, Id: msgId, message: "Message has been deleted", FromId: currentId });
   };
 
   useEffect(() => {
@@ -76,25 +64,14 @@ export default function Messages() {
   useEffect(() => {
     if (!currentId) return;
 
-    socketRef.current = io(API_URL, {
-      auth: { userId: String(currentId) },
-      transports: ["websocket"],
-      withCredentials: true,
-    });
+    socketRef.current = io(API_URL, { auth: { userId: String(currentId) }, transports: ["websocket"], withCredentials: true, });
 
     socketRef.current.on("recieveMessage", (data) => {
       if (Number(data.FromId) === Number(openChatId)) {
-        setMessages((prev) => [
-          ...prev,
-          data,
-        ]);
+        setMessages((prev) => [...prev, data,]);
       }
       setUsers((prev) => {
-        const updated = prev.map((u) =>
-          u.Id === data.FromId
-            ? { ...u, lastMessage: data.message }
-            : u
-        );
+        const updated = prev.map((u) => u.Id === data.FromId ? { ...u, lastMessage: data.message } : u);
         const sender = updated.find((u) => u.Id === data.FromId);
         const rest = updated.filter((u) => u.Id !== data.FromId);
 
@@ -106,22 +83,13 @@ export default function Messages() {
 
     socketRef.current.on("deletedrecive", (data) => {
       if (Number(data.FromId) === Number(openChatId)) {
-        setMessages(prevMessages =>
-          prevMessages.map(msg =>
-            msg.Id === data.Id
-              ? { ...msg, message: data.message }
-              : msg
-          )
-        );
+        setMessages(prevMessages => prevMessages.map(msg => msg.Id === data.Id ? { ...msg, message: data.message } : msg));
       }
     });
 
     socketRef.current.on("online:list", ({ onlineUsers }) => {
       setUsers((prevUsers) => {
-        const updated = prevUsers.map((u) => ({
-          ...u,
-          isOnline: onlineUsers.includes(String(u.Id)),
-        }));
+        const updated = prevUsers.map((u) => ({ ...u, isOnline: onlineUsers.includes(String(u.Id)), }));
 
         return updated.sort((a, b) => {
           if (a.isOnline === b.isOnline) return 0;
@@ -137,27 +105,21 @@ export default function Messages() {
         setTyping(true);
 
         clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => {
-          setTyping(false);
-        }, 2000);
+        typingTimeout = setTimeout(() => setTyping(false), 2000);
       }
     });
-
 
     return () => socketRef.current.disconnect();
   }, [currentId, openChatId]);
 
-  useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typing]);
+  useLayoutEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, typing]);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const res = await fetch(`${API_URL}/api/message/message`, {
-        credentials: "include",
-      });
+      const res = await fetch(`${API_URL}/api/message/message`, { credentials: "include", });
       const data = await res.json();
+
       setUser(data.user);
       setCurrentId(data.Id);
       setLoading(false);
@@ -166,11 +128,12 @@ export default function Messages() {
   }, []);
 
   const fetchUsers = async () => {
-    const res = await fetch(`${API_URL}/api/message/userlist`, {
-      credentials: "include",
-    });
+    const res = await fetch(`${API_URL}/api/message/userlist`, { credentials: "include", });
     const data = await res.json();
-    setUsers(data.message || []);
+    const list = data.message || [];
+
+    setAllUsers(list);
+    setUsers(list);
   };
 
   const openChat = async (u) => {
@@ -185,10 +148,7 @@ export default function Messages() {
     if (isMobile) setShowChat(true);
     setLoading(true)
 
-    const res = await fetch(
-      `${API_URL}/api/message/showMessage?Id=${u.Id}`,
-      { method: "POST", credentials: "include" }
-    );
+    const res = await fetch(`${API_URL}/api/message/showMessage?Id=${u.Id}`, { method: "POST", credentials: "include" });
     const data = await res.json();
     setMessages(data.data || []);
     setLoading(false)
@@ -198,10 +158,7 @@ export default function Messages() {
     }, 0);
   };
 
-  const goBack = () => {
-    setShowChat(false);
-    setSelectedUser(null);
-  };
+  const goBack = () => { setShowChat(false); setSelectedUser(null); };
 
   useEffect(() => {
     setSending(!message.trim() && files.length === 0);
@@ -215,9 +172,7 @@ export default function Messages() {
     formData.append("message", message);
     formData.append("reciverId", openChatId);
 
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
+    files.forEach((file) => formData.append("files", file));
 
     const res = await fetch(`${API_URL}/api/message/saveMessage`, {
       method: "POST",
@@ -228,24 +183,8 @@ export default function Messages() {
     const result = await res.json();
 
     if (result.success) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          Id: result.data.Id,
-          message: result.data.message,
-          url: result.data.files,
-          fromMe: true,
-          created_at: result.data.created_at,
-        },
-      ]);
-
-      socketRef.current.emit("sendMessage", {
-        to: openChatId,
-        message: result.data.message,
-        url: result.data.files,
-        FromId: currentId,
-        created_at: result.data.created_at,
-      });
+      setMessages((prev) => [...prev, { Id: result.data.Id, message: result.data.message, url: result.data.files, fromMe: true, created_at: result.data.created_at, },]);
+      socketRef.current.emit("sendMessage", { to: openChatId, message: result.data.message, url: result.data.files, FromId: currentId, created_at: result.data.created_at, });
 
       setMessage("");
       setLoadMess(false)
@@ -269,10 +208,7 @@ export default function Messages() {
 
     const prevScrollHeight = container.scrollHeight;
 
-    const res = await fetch(
-      `${API_URL}/api/message/loadmess?page=${pageRef.current}&Id=${openChatId}`,
-      { credentials: "include" }
-    );
+    const res = await fetch(`${API_URL}/api/message/loadmess?page=${pageRef.current}&Id=${openChatId}`, { credentials: "include" });
 
     const result = await res.json();
     const oldMessages = result.data || [];
@@ -288,18 +224,13 @@ export default function Messages() {
 
     pageRef.current += 1;
 
-    requestAnimationFrame(() => {
-      const newScrollHeight = container.scrollHeight;
-      container.scrollTop = newScrollHeight - prevScrollHeight;
-    });
+    requestAnimationFrame(() => { const newScrollHeight = container.scrollHeight; container.scrollTop = newScrollHeight - prevScrollHeight; });
 
     setMessLoading(false);
     loadingRef.current = false;
   }
 
-  const toggleActions = (id) => {
-    setActiveMsgId(prev => (prev === id ? null : id));
-  };
+  const toggleActions = (id) => { setActiveMsgId(prev => (prev === id ? null : id)); };
 
   const formatLastTime = (time) => {
     if (!time) return "";
@@ -319,48 +250,33 @@ export default function Messages() {
     });
   };
 
-  // useEffect(() => {
-  //   if (query.trim().length < 1) {
-  //     setUsers(newuser);
-  //     return;
-  //   }
-  //   setNewUser(users);
+  useEffect(() => {
 
-  //   const timer = setTimeout(() => {
+    const searchValue = query.trim().toLowerCase();
 
-  //     const filtered = newuser.filter((u) =>
-  //       u.Username.toLowerCase().includes(query.toLowerCase())
-  //     );
-
-  //     setUsers(filtered);
-
-  //   }, 300);
-
-  //   return () => clearTimeout(timer);
-
-  // }, [query]);
-
-  const clearChat = async (id) => {
-    const res = await fetch(`${API_URL}/api/message/clearchat`, {
-      credentials: "include",
-    });
-
-    const result = await res.json();
-
-    if (result.success) {
-      if (openChat == id) return setMessages([])
+    if (searchValue === "") {
+      setUsers(allUsers);
+      return;
     }
-  }
 
-  const clearUser = async (id) => {
-    const res = await fetch(`${API_URL}/api/message/clearuser?id=${id}`, {
-      credentials: "include",
-    });
+    const timer = setTimeout(() => {
+      const filtered = allUsers.filter((u) => u.Username?.toLowerCase().includes(searchValue) || u.First_name?.toLowerCase().includes(searchValue));
+      setUsers(filtered);
+    }, 300);
 
+    return () => clearTimeout(timer);
+
+  }, [query, allUsers]);
+
+  const ClearChat = async (id) => {
+    const res = await fetch(`${API_URL}/api/message/clearchat?id=${id}`, { credentials: "include", });
     const result = await res.json();
 
     if (result.success) {
-      setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+      setConfirmChatDelete(null)
+      setOpenChatId(false)
+      setSelectedUser(null)
+      setUsers(pre => pre.filter(user => user.Id !== id))
     }
   }
 
@@ -387,42 +303,79 @@ export default function Messages() {
           <div className="flex-1 overflow-y-auto mt-4 px-2">
 
             {users && users.map((u) => (
-              <button key={u.Id} onClick={() => openChat(u)} className="relative w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition" >
-                <div className="relative shrink-0">
-                  <img src={u.image_src} alt={u.Username} className="w-11 h-11 rounded-full object-cover" />
+              <div key={u.Id} className="relative group">
 
-                  {u.isOnline && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                  )}
-                </div>
+                <button onClick={() => openChat(u)} className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition">
+                  <div className="relative shrink-0">
+                    <img src={u.image_src} alt={u.Username} className="w-11 h-11 rounded-full object-cover" />
 
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold truncate">{u.Username}</p>
-
-                    <span className="text-[11px] text-gray-400">
-                      {formatLastTime(u.created_at)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500 truncate">
-                      {u.lastMessage || "Sent a media"}
-                    </p>
-
-                    {u.isOnline ? (
-                      <span className="text-[10px] font-semibold text-green-600">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-gray-400">
-                        Offline
-                      </span>
+                    {u.isOnline && (
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                     )}
                   </div>
-                </div>
-              </button>
+
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold truncate">{u.Username}</p>
+                      <span className="text-[11px] text-gray-400">
+                        {formatLastTime(u.created_at)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-500 truncate">
+                        {u.lastMessage || "Sent a media"}
+                      </p>
+
+                      {u.isOnline ? (
+                        <span className="text-[10px] font-semibold text-green-600">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-gray-400">
+                          Offline
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+              </div>
             ))}
+
+            {users.length === 0 && query.trim() !== "" && (
+              <div className="flex flex-col items-center justify-center mt-10 text-center px-6">
+
+                <div className="w-14 h-14 rounded-full bg-gray-100 
+                    flex items-center justify-center mb-4">
+                  <FiSearch size={20} className="text-gray-400" />
+                </div>
+
+                <h3 className="text-sm font-semibold text-gray-700">
+                  No users found
+                </h3>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Try searching with a different name.
+                </p>
+
+              </div>
+            )}
+
+            {users.length === 0 && (
+              <div className="flex flex-col items-center -translate-y-11 justify-center h-full px-6 text-center">
+
+                <div className="w-20 h-20 rounded-full  bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white shadow-lg mb-5">           <FiMessageCircle size={30} />
+                </div>
+
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Your Messages
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-2 max-w-xs">  Send private photos and messages to a friend.  Start a new conversation today.</p>
+
+              </div>
+            )}
 
           </div>
         </div>
@@ -450,8 +403,21 @@ export default function Messages() {
       {(!isMobile || showChat) && (
         <div className="flex-1 flex flex-col">
           {!selectedUser ? (
-            <div className="flex items-center justify-center h-full">
-              <h2 className="text-xl font-bold">Select a chat</h2>
+            <div className="flex flex-col items-center justify-center h-full text-center px-6">
+
+              <div className="w-16 h-16 rounded-full bg-gray-100 
+                      flex items-center justify-center mb-4">
+                <FiMessageCircle size={26} className="text-gray-400" />
+              </div>
+
+              <h3 className="text-lg font-semibold text-gray-800">
+                No conversation selected
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-2">
+                Choose a chat to start messaging.
+              </p>
+
             </div>
           ) : (
             <>
@@ -468,11 +434,21 @@ export default function Messages() {
                     <p className="text-xs">{selectedUser.First_name}</p>
                   </div>
                 </div>
-                <FiMoreVertical onClick={() => clearUser(openChatId)} />
+                <button onClick={() => setActiveUserOption(prev => prev === selectedUser.Id ? null : selectedUser.Id)}>
+                  <FiMoreVertical />
+                </button>
+
+                {activeUserOption === selectedUser.Id && (
+                  <div className="absolute right-4 top-12 bg-white border shadow-lg rounded-lg w-40 text-sm z-50">
+                    <button onClick={() => setConfirmChatDelete(selectedUser.Id)} className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-500">
+                      Delete Chat
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div ref={MessContainer} className="flex-1 overflow-y-auto p-4 space-y-3">
-                {!noMoreRef.current && (
+                {(!noMoreRef.current && message.length > 1) && (
                   <div className="w-full flex justify-center mb-3">
                     <button onClick={loadMessages} disabled={messloaging} className="px-4 cursor-pointer py-1 text-xs rounded-full border bg-white shadow hover:bg-gray-100 transition disabled:opacity-60">
                       {messloaging ? (
@@ -481,6 +457,27 @@ export default function Messages() {
                         "Load more messages"
                       )}
                     </button>
+                  </div>
+                )}
+
+                {confirmChatDelete && (
+                  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-xl w-[300px] text-center">
+                      <h3 className="font-semibold mb-2">Delete Chat?</h3>
+                      <p className="text-sm text-gray-500 mb-5">
+                        This will remove this conversation.
+                      </p>
+
+                      <div className="flex justify-center gap-3">
+                        <button onClick={() => setConfirmChatDelete(null)} className="px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300">
+                          Cancel
+                        </button>
+
+                        <button onClick={() => ClearChat(confirmChatDelete)} className="px-4 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -537,6 +534,23 @@ export default function Messages() {
                     </div>
                   </div>
                 ))}
+
+                {messages.length === 1 && (
+                  <div className="flex flex-col items-center justify-center h-full text-center px-6 bg-gradient-to-b from-white to-gray-50">
+
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-r from-sky-500 to-voilate-400 
+                      flex items-center justify-center shadow-inner mb-5">
+                      <FiMessageCircle size={32} className="text-white" />
+                    </div>
+
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      Your Messages
+                    </h2>
+
+                    <p className="text-sm text-gray-500 mt-2 max-w-xs">
+                      Send private photos and messages to a friend or group.
+                    </p>
+                  </div>)}
 
                 {typing && (<p className="text-xs text-gray-400 italic px-2">  typing... </p>)}
                 <div ref={messagesEndRef} />

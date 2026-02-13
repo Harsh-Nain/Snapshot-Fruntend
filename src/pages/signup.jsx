@@ -6,9 +6,11 @@ export default function Signup() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const navigate = useNavigate();
     const [message, setmessage] = useState("")
+    const [loading, setLoading] = useState(false)
 
     const { register, handleSubmit, formState: { errors } } = useForm();
     const onSubmit = async (formData) => {
+        setLoading(true)
         const res = await fetch(`${API_URL}/api/auth/signup`, {
             method: "POST",
             headers: {
@@ -20,6 +22,7 @@ export default function Signup() {
 
         const data = await res.json();
         console.log("Signup response:", data);
+        setLoading(false)
 
         if (!data.success) return setmessage(data.message)
 
@@ -32,6 +35,13 @@ export default function Signup() {
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-100 w-full">
+
+            {loading && (
+                <div className="flex justify-center items-center fixed top-0 left-0 h-[100vh] w-[100vw] bg-black/70 z-9999">
+                    <DotSpinner size="3rem" color="white" />
+                </div>
+            )}
+
             <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 flex flex-col gap-5">
 
                 <h1 className="text-3xl font-semibold text-center text-zinc-800">

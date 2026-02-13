@@ -4,8 +4,8 @@ import { TimeAgo, formatCount } from "../components/agotime";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
-import { IoVolumeMute } from "react-icons/io5";
-import { IoVolumeHigh } from "react-icons/io5";
+import { IoVolumeMute, IoVolumeHigh } from "react-icons/io5";
+import { FiMessageCircle } from "react-icons/fi";
 
 export default function Home() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
@@ -228,6 +228,12 @@ export default function Home() {
     return (
         <div className="flex flex-col z sm:flex-row justify-center w-full h-[88vh] md:h-[100vh] bg-[#fafafa]">
 
+            {loading && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <DotSpinner size="3rem" color="#000" />
+                </div>
+            )}
+
             <span className="text-3xl sm:hidden font-black pl-3 font-normal tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
                 Snapshot
             </span>
@@ -378,11 +384,11 @@ export default function Home() {
             </div>
 
             {showComments && (
-                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50">
+                <div className="fixed inset-0 z-999999 z-50 flex items-end md:items-center justify-center bg-black/50">
 
                     <div className="absolute inset-0" onClick={() => closeComment()} />
 
-                    <div className="relative w-full md:w-[600px] h-[75vh] md:h-[80vh] bg-white rounded-t-2xl md:rounded-md border border-gray-200 flex flex-col">
+                    <div className="relative w-full md:w-[600px] pb-7 sm:p-0 h-[75vh] md:h-[80vh] bg-white rounded-t-2xl md:rounded-md border border-gray-200 flex flex-col">
 
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
                             <h2 className="font-semibold text-black text-base">
@@ -415,6 +421,24 @@ export default function Home() {
                                     </div>
                                 </div>
                             ))}
+
+                            {Comments.length === 0 && (
+                                <div className="flex flex-col items-center justify-center py-16 text-center">
+
+                                    <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                        <FiMessageCircle size={28} className="text-gray-400" />
+                                    </div>
+
+                                    <h3 className="text-base font-semibold text-gray-800">
+                                        Start the conversation
+                                    </h3>
+
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Share your thoughts about this post.
+                                    </p>
+
+                                </div>
+                            )}
 
                         </div>
 

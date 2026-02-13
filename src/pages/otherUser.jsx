@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck } from "react-icons/fi";
+import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck, FiImage } from "react-icons/fi";
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 
@@ -187,7 +187,7 @@ export default function OtherUser() {
     };
 
     return (
-        <main className="flex justify-center bg-[#fafafa] min-h-screen sm:p-4">
+        <main className="flex justify-center bg-[#fafafa] w-full min-h-screen sm:p-4">
 
             <div className="w-full max-w-5xl bg-white rounded-xl p-6">
 
@@ -199,7 +199,7 @@ export default function OtherUser() {
 
                 <div className="flex flex-col sm:flex-row gap-10">
 
-                    <img src={data?.image_src} className="w-32 h-32 rounded-full object-cover" />
+                    <img src={data?.image_src} className="w-32 h-32 bg-sky-100 rounded-full object-cover" />
 
                     <div className="flex flex-col gap-4">
 
@@ -241,10 +241,29 @@ export default function OtherUser() {
                 <div className="grid grid-cols-3 gap-1 mt-8">
                     {userPost.map(post => (
                         <div key={post.Id} onClick={() => showImage(post.Id)} className="cursor-pointer" style={{ aspectRatio: "1/1" }}>
-                            <img src={post.image_url} className="w-full h-full object-cover" />
+                            <img src={post.image_url} className="w-full bg-sky-100 h-full object-cover" />
                         </div>
                     ))}
                 </div>
+
+                {userPost.length === 0 && (
+                    <div className="flex flex-col items-center w-full justify-center py-20 text-center">
+
+                        <div className="w-20 h-20 flex items-center justify-center rounded-full border-2 border-gray-300 mb-4">
+                            <FiImage size={36} className="text-gray-400" />
+                        </div>
+
+                        <h3 className="text-lg font-semibold text-gray-800">
+                            No Posts Yet
+                        </h3>
+
+                        <p className="text-sm text-gray-500 mt-2 max-w-xs">
+                            When {data?.Username || "this user"} shares photos or videos,
+                            they’ll appear here.
+                        </p>
+
+                    </div>
+                )}
 
             </div>
 
@@ -253,14 +272,17 @@ export default function OtherUser() {
 
                     <div className="bg-white w-full max-w-4xl flex flex-col md:flex-row h-[100vh] md:h-[85vh] rounded-lg overflow-hidden">
 
-                        <div className="md:w-1/2 bg-black flex items-center h-[40vh]  sm:max-h-[30vh] justify-center">
-                            <img src={Post.image_url} className="object-contain max-h-full" />
+                        <div className="md:w-1/2 bg-black flex items-center h-[40vh] sm:h-full justify-center">
+                            <img src={Post.image_url} className="bg-sky-100 object-contain max-h-full" />
                         </div>
 
                         <div className="md:w-1/2 flex flex-col h-[54vh] sm:h-full">
 
-                            <div className="flex justify-between items-center p-4 border-b">
-                                <p className="font-semibold">{Post.username}</p>
+                            <div className="flex justify-between items-center p-2 border-b">
+                                <div className="flex gap-3 justify-center items-center">
+                                    <img src={Post.image_src} className="w-9 h-9 rounded-full object-cover" />
+                                    <p className="font-semibold">{Post.username}</p>
+                                </div>
                                 <FiX size={22} onClick={() => setPost(null)} className="cursor-pointer" />
                             </div>
 
@@ -281,6 +303,24 @@ export default function OtherUser() {
                                         </div>
                                     </div>
                                 ))}
+
+                                {Comments.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center py-16 text-center">
+
+                                        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                            <FiMessageCircle size={28} className="text-gray-400" />
+                                        </div>
+
+                                        <h3 className="text-base font-semibold text-gray-800">
+                                            Start the conversation
+                                        </h3>
+
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            Share your thoughts about this post.
+                                        </p>
+
+                                    </div>
+                                )}
                             </div>
 
                             <div className="border-t p-4">
@@ -325,7 +365,7 @@ export default function OtherUser() {
                         <div className="flex-1 overflow-y-auto">
                             {(followType === "followers" ? followers : following).map(user => (
                                 <div key={user.Id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                                    <img src={user.image_src} className="w-9 h-9 rounded-full object-cover" />
+                                    <img src={user.image_src} className="w-9 h-9 bg-sky-100 rounded-full object-cover" />
                                     <div>
                                         <p className="text-sm font-semibold">{user.Username}</p>
                                         <p className="text-xs text-gray-500">{user.First_name}</p>
@@ -342,7 +382,7 @@ export default function OtherUser() {
                                         <div key={user.Id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
 
                                             <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer">
-                                                <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" />
+                                                <img src={user.image_src} className="w-10 h-10 bg-sky-100 rounded-full object-cover" />
                                                 <div>
                                                     <p className="text-sm font-semibold">
                                                         {user.Username}

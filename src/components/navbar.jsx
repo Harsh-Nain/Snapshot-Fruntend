@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { FiSearch } from "react-icons/fi";
 
 export default function Navbar() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -114,7 +115,7 @@ export default function Navbar() {
             )}
 
             {isSearchOpen && (
-                <div className="fixed md:left-[250px] z-50 w-full md:w-[400px] h-screen bg-white border-l border-gray-200 flex flex-col">
+                <div className="fixed md:left-[220px] z-50 w-full md:w-[400px] h-screen bg-white border-l border-gray-200 flex flex-col">
 
                     <div className="p-5 border-b border-gray-200">
                         <h2 className="font-semibold text-lg mb-4 text-black">Search</h2>
@@ -139,6 +140,25 @@ export default function Navbar() {
                                 </div>
                             </div>
                         ))}
+
+                        {query.length < 1 || users.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-20 text-center">
+
+                                <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                    <FiSearch size={28} className="text-gray-400" />
+                                </div>
+
+                                <h3 className="text-base font-semibold text-gray-800">
+                                    No results found
+                                </h3>
+
+                                <p className="text-sm text-gray-500 mt-2 max-w-xs">
+                                    We couldn’t find anyone matching <span className="font-medium">"{query}"</span>.
+                                </p>
+
+                            </div>
+                        )}
+
                     </div>
                 </div>
             )}

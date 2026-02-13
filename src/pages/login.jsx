@@ -6,9 +6,11 @@ export default function Login() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const navigate = useNavigate();
     const [message, setmessage] = useState("")
+    const [loading, setLoading] = useState(false)
     const { register, handleSubmit, formState: { errors }, } = useForm();
 
     const onSubmit = async (formData) => {
+        setLoading(true)
         const res = await fetch(`${API_URL}/api/auth/login`, {
             method: "POST",
             headers: {
@@ -20,12 +22,14 @@ export default function Login() {
 
         const data = await res.json();
         console.log("Login response:", data);
-
+        
+        setLoading(false)
         if (!data.success) return setmessage(data.message)
 
         if (!res.ok) {
             throw new Error(data.message || "Login failed");
         }
+
 
         navigate("/");
     };
@@ -34,6 +38,12 @@ export default function Login() {
         <>
             <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-100 w-full">
                 <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 flex flex-col gap-5">
+
+                    {loading && (
+                        <div className="flex justify-center items-center fixed top-0 left-0 h-[100vh] w-[100vw] bg-black/70 z-9999">
+                            <DotSpinner size="3rem" color="white" />
+                        </div>
+                    )}
 
                     <h1 className="text-3xl font-semibold text-center text-zinc-800">
                         Snapshot
