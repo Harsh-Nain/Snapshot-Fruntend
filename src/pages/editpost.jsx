@@ -146,12 +146,12 @@ export default function EditPost() {
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <DotSpinner size="3rem" />
+          <DotSpinner size="3rem" color="white" />
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white sm:rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
-        <label className="w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center cursor-pointer relative group">
+        <label className="w-full lg:w-1/2 h-[45vh] sm:h-full aspect-square bg-gray-100 flex items-center justify-center cursor-pointer relative group">
           {!imagePreview ? (
             <div className="text-center text-gray-400 group-hover:text-gray-600 transition">
               <FiImage size={40} className="mx-auto mb-4" />

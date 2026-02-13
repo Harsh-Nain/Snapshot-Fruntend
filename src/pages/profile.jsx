@@ -64,6 +64,7 @@ export default function Profile() {
 
   useEffect(() => {
     const loadProfile = async () => {
+      setLoading(true)
       const res = await fetch(`${API_URL}/api/profile`, {
         method: "GET",
         credentials: "include",
@@ -71,7 +72,7 @@ export default function Profile() {
 
       const result = await res.json();
       console.log(result);
-
+      setLoading(false)
       setData(result.data);
       setUserPost(result.userPost || []);
       setFollowers(result.follower || []);
@@ -230,9 +231,7 @@ export default function Profile() {
 
     await res.json();
 
-    setUserPost(prev =>
-      prev.filter(post => post.Id !== Post.Id)
-    );
+    setUserPost(prev => prev.filter(post => post.Id !== Post.Id));
     setPost(null);
     setDeleteConfirmOpen(false);
     setDeleteLoading(false);
@@ -261,6 +260,7 @@ export default function Profile() {
   };
 
   const otherUser = (userId, username) => {
+    if (userId === user.Id) return navigate('/api/profile')
     navigate(`/user?username=${username}&Id=${userId}`);
   };
 
@@ -330,8 +330,12 @@ export default function Profile() {
 
         <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 items-center sm:items-start">
 
-          <div className="w-28 h-28 sm:w-36 sm:h-36">
-            <img src={data?.image_src} alt="" className="w-full h-full bg-sky-100 rounded-full object-cover border border-gray-300" />
+          <div className="relative w-28 h-28 sm:w-36 sm:h-36 group">
+            <div className="absolute inset-0 rounded-full p-[3px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+              <div className="w-full h-full bg-white rounded-full p-[3px]">
+                <img src={data?.image_src} className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              </div>
+            </div>
           </div>
 
           <div className="flex-1 flex flex-col gap-4 items-center sm:items-start text-center sm:text-left">
@@ -413,7 +417,6 @@ export default function Profile() {
 
           </div>
         )}
-
       </div>
 
       {Post && (
@@ -421,7 +424,7 @@ export default function Profile() {
 
           <div className="bg-white flex flex-col md:flex-row w-full max-w-5xl h-[100vh] md:h-[85vh] sm:rounded-lg overflow-hidden relative">
 
-            <div className="w-full md:w-1/2 bg-black flex justify-center items-center h-[40vh] sm:h-full sm:max-h-[30vh] md:max-h-full">
+            <div className="w-full md:w-1/2 bg-black flex justify-center items-center h-[45vh] sm:h-full sm:max-h-[30vh] md:max-h-full">
               <img src={Post.image_url} alt="" className="w-full h-full object-contain" />
             </div>
 
@@ -551,8 +554,11 @@ export default function Profile() {
             </h2>
 
             <div className="flex flex-row items-center gap-3 mb-6">
-              <div className="w-24 h-24 rounded-full overflow-hidden border">
-                <img src={imagePreview || data?.image_src} alt="" className="w-full bg-sky-100 h-full object-cover" />
+
+              <div className="relative w-25 h-25">
+                <div className="absolute inset-0 rounded-full p-[3px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+                  <img src={imagePreview || data?.image_src} alt="profile" className="w-full h-full rounded-full object-cover transition-transform duration-300" />
+                </div>
               </div>
 
               <div className="flex flex-col">

@@ -35,8 +35,7 @@ export default function OtherUser() {
         if (!userId) return;
 
         const loadProfile = async () => {
-            console.log('okmdivonfgbhifkjdvnfjkjdsfvnidj');
-
+            setPostloading(true)
             const res = await fetch(`${API_URL}/api/auth/userProfile`, {
                 method: "POST",
                 credentials: "include",
@@ -59,6 +58,7 @@ export default function OtherUser() {
 
             const result = await res.json();
             console.log('isFollowing', result.isfollowing);
+            setPostloading(false)
 
             setData(result.data);
             setUserPost(result.userPost || []);
@@ -186,6 +186,7 @@ export default function OtherUser() {
     }
 
     const otherUser = (userId, username) => {
+         if (userId === user.Id) return navigate('/api/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
@@ -202,7 +203,11 @@ export default function OtherUser() {
 
                 <div className="flex flex-col sm:flex-row gap-10">
 
-                    <img src={data?.image_src} className="w-32 h-32 bg-sky-100 rounded-full object-cover" />
+                    <div className="relative w-32 h-32">
+                        <div className="absolute inset-0 rounded-full p-[3px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+                            <img src={data?.image_src} className="w-full h-full rounded-full object-cover transition-transform duration-300" />
+                        </div>
+                    </div>
 
                     <div className="flex flex-col gap-4">
 
@@ -275,7 +280,7 @@ export default function OtherUser() {
 
                     <div className="bg-white w-full max-w-4xl flex flex-col md:flex-row h-[100vh] md:h-[85vh] rounded-lg overflow-hidden">
 
-                        <div className="md:w-1/2 bg-black flex items-center h-[40vh] sm:h-full justify-center">
+                        <div className="md:w-1/2 bg-black flex items-center h-[45vh] sm:h-full justify-center">
                             <img src={Post.image_url} className="bg-sky-100 object-contain max-h-full" />
                         </div>
 

@@ -27,11 +27,13 @@ export default function Home() {
     const [showComments, setShowComments] = useState(false);
 
     const [loading, setloading] = useState(false);
+    const [Loading, setLoading] = useState(false);
     const [CommentsPostId, setCommentsPostId] = useState();
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
     useEffect(() => {
         const loadDashboard = async () => {
+            setLoading(true)
             const res = await fetch(`${API_URL}/`, {
                 method: "GET",
                 credentials: "include",
@@ -45,8 +47,8 @@ export default function Home() {
             const data = await res.json();
             console.log("Dashboard data:", data);
 
+            setLoading(false)
             setsuggession(data.suggsionId)
-
             setPosts(data.post || []);
             setUser(data.data || '');
         };
@@ -55,6 +57,7 @@ export default function Home() {
     }, [navigate]);
 
     const otherUser = (userId, username) => {
+        if (userId === user.Id) return navigate('/api/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
@@ -226,11 +229,11 @@ export default function Home() {
     }
 
     return (
-        <div className="flex flex-col z sm:flex-row justify-center w-full h-[88vh] md:h-[100vh] bg-[#fafafa]">
+        <div className="flex flex-col sm:flex-row justify-center w-full h-[92vh] md:h-[100vh] bg-[#fafafa]">
 
-            {loading && (
+            {Loading && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <DotSpinner size="3rem" color="#000" />
+                    <DotSpinner size="3rem" color="white" />
                 </div>
             )}
 
@@ -307,11 +310,7 @@ export default function Home() {
                         </div>
                     ))}
 
-                    {loading && (
-                        <div className="flex justify-center py-6">
-                            <DotSpinner size="1.5rem" color="black" />
-                        </div>
-                    )}
+                    {loading && (<div className="flex justify-center py-6"><DotSpinner size="1.5rem" color="gray" /></div>)}
                 </div>
             </div>
 
@@ -334,8 +333,8 @@ export default function Home() {
                             </div>
                         </div>
 
-                        <button className="text-sm font-semibold text-blue-500 hover:text-blue-600">
-                            Switch
+                        <button onClick={() => navigate('/api/post/post')} className="text-sm font-semibold text-blue-500 hover:text-blue-600">
+                            Create
                         </button>
                     </div>
 
@@ -344,7 +343,7 @@ export default function Home() {
                             Suggested for you
                         </p>
 
-                        <button className="text-xs font-semibold text-black hover:text-gray-600">
+                        <button className="text-xs font-semibold text-black">
                             See All
                         </button>
                     </div>
@@ -391,9 +390,7 @@ export default function Home() {
                     <div className="relative w-full md:w-[600px] pb-7 sm:p-0 h-[75vh] md:h-[80vh] bg-white rounded-t-2xl md:rounded-md border border-gray-200 flex flex-col">
 
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-                            <h2 className="font-semibold text-black text-base">
-                                Comments
-                            </h2>
+                            <h2 className="font-semibold text-black text-base">Comments</h2>
                             <button onClick={() => closeComment()} className="text-black text-lg hover:text-gray-600"> ✕</button>
                         </div>
 

@@ -11,7 +11,6 @@ export default function Navbar() {
     const [query, setQuery] = useState("");
     const [users, setUsers] = useState([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const resize = () => setIsDesktop(window.innerWidth >= 768);
@@ -23,29 +22,17 @@ export default function Navbar() {
     useEffect(() => {
         if (query.trim().length < 2) {
             setUsers([]);
-            setLoading(false);
             return;
         }
 
         const controller = new AbortController();
         const timer = setTimeout(async () => {
-            try {
-                setLoading(true);
-                const res = await fetch(
-                    `${API_URL}/search?q=${query}`,
-                    { credentials: "include", signal: controller.signal }
-                );
-                setUsers(await res.json());
-            } catch { }
-            finally {
-                setLoading(false);
-            }
+            const res = await fetch(`${API_URL}/search?q=${query}`, { credentials: "include", signal: controller.signal });
+            setUsers(await res.json());
+
         }, 350);
 
-        return () => {
-            controller.abort();
-            clearTimeout(timer);
-        };
+        return () => { controller.abort(); clearTimeout(timer); };
     }, [query]);
 
     useEffect(() => {
@@ -71,12 +58,10 @@ export default function Navbar() {
                 <aside className="w-[250px] sticky top-0 h-[100vh] flex flex-col justify-between px-6 py-8 bg-white border-r border-gray-200">
 
                     <div className="flex flex-col gap-2">
-
                         <NavLink onClick={() => setIsSearchOpen(false)} to="/" className="px-3 pb-8">
                             <span className="text-3xl font-black font-normal tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
                                 Snapshot
                             </span>
-
                         </NavLink>
 
                         <NavLink onClick={() => setIsSearchOpen(false)} to="/" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition  ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}             >
@@ -130,6 +115,7 @@ export default function Navbar() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
+
                         {users.map((user) => (
                             <div key={user.Id} onClick={() => { setIsSearchOpen(false); navigate(`/user?username=${user.Username}&Id=${user.Id}`); }} className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-100 transition">
                                 <img src={user.image_src} className="w-10 h-10 rounded-full object-cover" alt="" />
@@ -141,7 +127,7 @@ export default function Navbar() {
                             </div>
                         ))}
 
-                        {query.length < 1 || users.length === 0 && (
+                        {query.length < 0 || users.length === 0 && (
                             <div className="flex flex-col items-center justify-center py-20 text-center">
 
                                 <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">

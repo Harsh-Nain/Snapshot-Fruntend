@@ -283,16 +283,16 @@ export default function Messages() {
   }
 
   return (
-    <div className="flex w-full h-[88vh] sm:h-screen bg-white overflow-hidden">
+    <div className="flex w-full h-[85vh] sm:h-screen bg-white overflow-hidden">
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <DotSpinner size="3rem" color="#000" />
+          <DotSpinner size="3rem" color="white" />
         </div>
       )}
 
       {(!isMobile || !showChat) && (
-        <div className="w-full sm:w-[30%] border-r flex flex-col">
+        <div className="w-full sm:w-[50%] lg:w-[30%] border-r flex flex-col">
           <div className="p-4 font-bold text-lg">{user?.Username}</div>
 
           <div className="px-4">
@@ -592,6 +592,7 @@ export default function Messages() {
           )}
         </div>
       )}
+      
     </div>
   );
 }
