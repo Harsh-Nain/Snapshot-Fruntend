@@ -140,7 +140,7 @@ export default function EditPost() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#fafafa] flex items-center justify-center px-4 py-10 z-9999">
+    <div className="w-full min-h-screen bg-[#fafafa] flex items-center justify-center sm:px-4 sm:py-10 z-9999">
 
       <div className="absolute inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/api/profile")} size="2rem" /></div>
 
@@ -150,7 +150,7 @@ export default function EditPost() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
+      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white sm:rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
         <label className="w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center cursor-pointer relative group">
           {!imagePreview ? (
             <div className="text-center text-gray-400 group-hover:text-gray-600 transition">
