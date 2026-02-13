@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
+import DotSpinner from "../components/dot-spinner-anim";
+
 
 export default function Signup() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
