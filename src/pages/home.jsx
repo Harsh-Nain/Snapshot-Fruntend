@@ -229,7 +229,7 @@ export default function Home() {
     }
 
     return (
-        <div className="flex flex-col sm:flex-row justify-center w-full h-[92vh] md:h-[100vh] bg-[#fafafa]">
+        <div className="flex flex-col sm:flex-row justify-center w-full h-[90vh] md:h-[100vh] bg-[#fafafa]">
 
             {Loading && (
                 <div className="fixed inset-0 bg-black/40 z-9999999 flex items-center justify-center">
@@ -237,7 +237,7 @@ export default function Home() {
                 </div>
             )}
 
-            <span className="text-3xl sm:hidden font-black pl-3 pb-3 font-normal tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+            <span className="text-3xl sm:hidden font-black pl-3 pb-2 font-normal tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
                 Snapshot
             </span>
 
