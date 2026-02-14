@@ -280,7 +280,7 @@ export default function OtherUser() {
 
                     <div className="bg-white w-full max-w-4xl flex flex-col md:flex-row h-[100vh] md:h-[85vh] rounded-lg overflow-hidden">
 
-                        <div className="md:w-1/2 bg-black flex items-center h-[45vh] sm:h-full justify-center">
+                        <div className="md:w-1/2 bg-black flex items-center h-[40vh] sm:h-full justify-center">
                             <img src={Post.image_url} className="bg-sky-100 object-contain max-h-full" />
                         </div>
 
