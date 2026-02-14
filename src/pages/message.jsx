@@ -283,7 +283,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="flex w-full h-[85vh] sm:h-screen bg-white overflow-hidden">
+    <div className="flex w-full h-[84vh] sm:h-screen bg-white overflow-hidden">
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

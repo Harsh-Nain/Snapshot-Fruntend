@@ -428,7 +428,7 @@ export default function Profile() {
               <img src={Post.image_url} alt="" className="w-full h-full object-contain" />
             </div>
 
-            <div className="w-full md:w-1/2 flex flex-col relative h-[54vh] sm:h-full">
+            <div className="w-full md:w-1/2 flex flex-col relative h-[50vh] sm:h-full">
 
               <div className="flex items-center justify-between px-4 py-3 border-b">
                 <div className="flex items-center gap-3">
