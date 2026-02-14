@@ -154,8 +154,8 @@ export default function Navbar() {
 
                     {[
                         { to: "/", icon: location.pathname === "/" ? <HomeFilled /> : <HomeOutline /> },
-                        { to: "/api/post/post", icon: <CreateOutline /> },
                         { to: "/api/message/message", icon: <MessageOutline /> },
+                        { to: "/api/post/post", icon: <CreateOutline /> },
                         { to: "/api/profile", icon: (<img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full object-cover" alt="" />) }
                     ].map((item, index) => (
                         <NavLink key={index} onClick={() => setIsSearchOpen(false)} to={item.to} className={({ isActive }) => `flex items-center justify-center p-3 transition ${isActive ? "text-black" : "text-gray-500"}`}>

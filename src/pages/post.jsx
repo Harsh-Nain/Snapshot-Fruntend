@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiImage, FiMusic, FiLock, FiUpload } from "react-icons/fi";
+import { FiImage, FiMusic, FiLock, FiUpload, FiX } from "react-icons/fi";
 import DotSpinner from "../components/dot-spinner-anim";
 
 export default function CreatePost() {
@@ -115,7 +115,9 @@ export default function CreatePost() {
   }, [imagePreview, audioUrl]);
 
   return (
-    <div className="w-full min-h-screen bg-[#fafafa] flex justify-center px-4 py-10">
+    <div className="w-full min-h-screen bg-[#fafafa] flex justify-center sm:px-4 sm:py-10 z-9999">
+
+      <div className="fixed inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/")} size="2rem" /></div>
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -123,7 +125,7 @@ export default function CreatePost() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
+      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white sm:rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
         <div onDragOver={(e) => { e.preventDefault(); setDragActive(true); }} onDragLeave={() => setDragActive(false)} onDrop={handleDropImage} className={`w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center relative transition     ${dragActive ? "border-4 border-pink-500 bg-pink-50" : ""}`}  >
           {!imagePreview ? (
             <div className="text-center text-gray-400">
@@ -138,7 +140,7 @@ export default function CreatePost() {
           <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
         </div>
 
-        <div className="w-full lg:w-1/2 p-8 flex flex-col gap-5">
+        <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col gap-5">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent">  Create Post</h2>
           <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
           <textarea rows={3} placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />

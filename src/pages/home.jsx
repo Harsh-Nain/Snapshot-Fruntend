@@ -229,7 +229,7 @@ export default function Home() {
     }
 
     return (
-        <div className="flex flex-col sm:flex-row justify-center w-full h-[90vh] md:h-[100vh] bg-[#fafafa]">
+        <div className="flex flex-col sm:flex-row justify-center w-full h-[89vh] md:h-[100vh] bg-[#fafafa]">
 
             {Loading && (
                 <div className="fixed inset-0 bg-black/40 z-9999999 flex items-center justify-center">
