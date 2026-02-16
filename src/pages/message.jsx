@@ -7,6 +7,7 @@ import { OnTime } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
+import { GiTireIronCross } from "react-icons/gi";
 
 export default function Messages() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -36,6 +37,7 @@ export default function Messages() {
   const [loading, setLoading] = useState(false);
   const [LoadMess, setLoadMess] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [senddd, setSenddd] = useState(true);
   const pageRef = useRef(2);
   const loadingRef = useRef(false);
   const noMoreRef = useRef(false);
@@ -172,6 +174,7 @@ export default function Messages() {
   const sendMessage = async () => {
     if (!message.trim() && files.length === 0) return;
     setLoadMess(true)
+    setSenddd(false)
 
     const formData = new FormData();
     formData.append("message", message);
@@ -188,7 +191,10 @@ export default function Messages() {
     const result = await res.json();
 
     if (result.success) {
-      setMessages((prev) => [...prev, { Id: result.data.Id, message: result.data.message, url: result.data.files, fromMe: true, created_at: result.data.created_at, },]);
+      const lastMessageId = messages.length > 0 && messages[messages.length - 1].Id + 1;
+
+      setSenddd(true)
+      setMessages((prev) => [...prev, { Id: lastMessageId, message: result.data.message, url: result.data.files, fromMe: true, created_at: result.data.created_at, },]);
       socketRef.current.emit("sendMessage", { to: openChatId, message: result.data.message, url: result.data.files, FromId: currentId, created_at: result.data.created_at, });
 
       setMessage("");
@@ -535,7 +541,9 @@ export default function Messages() {
                           )}
 
                           {m.fromMe && (
-                            <button onClick={() => setConfirmDeleteId(m.Id)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-600 shadow hover:bg-red-100">
+                            <button onClick={() => {
+                              setConfirmDeleteId(m.Id); console.log('okokko', m.Id);
+                            }} className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-600 shadow hover:bg-red-100">
                               <FiTrash2 size={12} /> Delete
                             </button>
                           )}
@@ -562,7 +570,7 @@ export default function Messages() {
                     </p>
                   </div>)}
 
-                {typing && (<p className="text-xs text-gray-400 italic px-2">  typing... </p>)}
+                {typing && (<p className="text-xs text-gray-400 italic px-2">typing... </p>)}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -571,9 +579,23 @@ export default function Messages() {
                 {files.length > 0 && (
                   <div className="flex gap-2 overflow-x-auto mb-2">
                     {files.map((file, index) => (
-                      <div key={index} className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg text-xs">
-                        <span className="truncate max-w-[120px]">{file.name}</span>
-                        <button onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))} className="text-red-500">✕</button>
+
+                      <div key={index} className="flex items-center gap-2 bg-gray-100 rounded-lg relative text-xs">
+                        {file.type?.startsWith("image") && (
+                          <img src={URL.createObjectURL(file)} onClick={() => setPreviewImage(URL.createObjectURL(file))} className="rounded-sm w-13 h-13 cursor-pointer" />
+                        )}
+                        {file.type?.startsWith("video") && (
+                          <video controls src={URL.createObjectURL(file)} className="rounded-sm w-13 h-13" />
+                        )}
+                        {file.type?.startsWith("audio") && (
+                          <audio controls src={URL.createObjectURL(file)} className="w-13 h-13" alt="Audio" />
+                        )}
+                        {file.type?.startsWith("application") && (
+                          <a href={URL.createObjectURL(file)} download className="flex items-center gap-2 px-3 py-2 bg-white rounded-sm shadow text-sm">
+                            📄 <span className="truncate max-w-[120px]">{file.name}</span>
+                          </a>
+                        )}
+                        {senddd && <button onClick={() => setFiles((prev) => prev.filter((_, i) => i !== index))} className="absolute rounded-full bg-zinc-50/50 p-1 text-red-400 hover:text-red-500 cursor-pointer top-1 right-1"><GiTireIronCross strokeWidth={40} /></button>}
                       </div>
                     ))}
                   </div>
