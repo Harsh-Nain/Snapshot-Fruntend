@@ -276,7 +276,7 @@ export default function Profile() {
   };
 
   const otherUser = (userId, username) => {
-    if (userId == user.Id) return navigate('/api/profile')
+    if (userId == data.Id) return navigate('/api/profile')
     navigate(`/user?username=${username}&Id=${userId}`);
   };
 
@@ -686,12 +686,8 @@ export default function Profile() {
                     <div onClick={() => otherUser(user.Id, user.Username)} className="flex items-center gap-3 cursor-pointer"    >
                       <img src={user.image_src} className="w-10 h-10 bg-sky-100  rounded-full object-cover" />
                       <div>
-                        <p className="text-sm font-semibold">
-                          {user.Username}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {user.First_name}
-                        </p>
+                        <p className="text-sm font-semibold">{user.Username}</p>
+                        <p className="text-xs text-gray-500">{user.First_name}</p>
                       </div>
                     </div>
 

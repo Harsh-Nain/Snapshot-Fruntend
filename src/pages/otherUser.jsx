@@ -85,7 +85,7 @@ export default function OtherUser() {
         };
 
         loadProfile();
-    }, [userId]);
+    }, [userId, navigate]);
 
     const toggleFollow = async () => {
         const path = isFollowing ? "unfollow" : "request";
@@ -202,8 +202,8 @@ export default function OtherUser() {
         }
     }
 
-    const otherUser = (userId, username) => {
-        if (userId == user.Id) return navigate('/api/profile')
+    const otherUser = (Id, username) => {
+        if (Id == userId) return navigate('/api/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
