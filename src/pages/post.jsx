@@ -27,7 +27,6 @@ export default function CreatePost() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-
   const handleImageFile = (file) => {
     if (!file.type.startsWith("image/")) {
       return setErrors({ image: "Only image files allowed" });
@@ -142,7 +141,11 @@ export default function CreatePost() {
 
         <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col gap-5">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent">  Create Post</h2>
-          <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
+          <div className="flex flex-col">
+            <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
+            {errors.caption && (<p className="text-red-500 text-xs mt-2">  {errors.caption}</p>)}
+          </div>
+
           <textarea rows={3} placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
           <button type="button" onClick={() => setOpenMusic(true)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-semibold">
             <FiMusic /> Add Music
@@ -150,8 +153,8 @@ export default function CreatePost() {
 
           {audioUrl && (
             <div className="bg-gray-100 p-4 rounded-xl">
-              <audio ref={audioRef} src={audioUrl} controls className="w-full" />
-              <button type="button" onClick={() => setAudioUrl(null)} className="text-red-500 text-xs mt-2"    >
+              <audio ref={audioRef} src={audioUrl} controls className="w-full"/>
+              <button type="button" onClick={() => setAudioUrl(null)} className="text-red-500 text-xs mt-2">
                 Remove Music
               </button>
             </div>

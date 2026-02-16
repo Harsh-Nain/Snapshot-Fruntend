@@ -158,37 +158,31 @@ export default function EditPost() {
               <p className="text-sm">Upload New Image</p>
               {errors.image && (<p className="text-red-500 text-xs mt-2">{errors.image}</p>)}
             </div>
-          ) : (
-            <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
-          )}
+          ) : (<img src={imagePreview} alt="preview" className="w-full h-full object-cover" />)}
 
           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </label>
 
         <div className="w-full lg:w-1/2 p-8 flex flex-col gap-6">
 
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
-            Edit Post
-          </h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">  Edit Post</h2>
 
-          <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-red-400 focus:border-yellow-400 outline-none" />
+          <div className="flex flex-col">
+            <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
+            {errors.caption && (<p className="text-red-500 text-xs mt-2">  {errors.caption}</p>)}
+          </div>
 
           <textarea rows={3} placeholder="Description..." value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-red-400 focus:border-yellow-400 outline-none" />
 
           <label className="flex items-center justify-between px-4 py-3 rounded-xl border bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-semibold cursor-pointer">
-            <div className="flex items-center gap-3">
-              <FiMusic />
-              {audioUrl ? "Change Music" : "Add Music"}
-            </div>
+            <div className="flex items-center gap-3">  <FiMusic />  {audioUrl ? "Change Music" : "Add Music"}</div>
             <input type="file" accept="audio/*" onChange={handleSongChange} className="hidden" />
           </label>
 
           {audioUrl && (
             <div className="bg-gray-100 p-4 rounded-xl">
               <audio ref={audioRef} src={audioUrl} controls className="w-full" />
-              <button type="button" onClick={removeMusic} className="text-red-500 text-xs mt-2">
-                Remove Music
-              </button>
+              <button type="button" onClick={removeMusic} className="text-red-500 text-xs mt-2">  Remove Music</button>
             </div>
           )}
 
