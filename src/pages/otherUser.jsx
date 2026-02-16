@@ -186,7 +186,7 @@ export default function OtherUser() {
     }
 
     const otherUser = (userId, username) => {
-         if (userId === user.Id) return navigate('/api/profile')
+        if (userId === user.Id) return navigate('/api/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 

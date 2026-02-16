@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import DotSpinner from "../components/dot-spinner-anim";
+import { MdOutlineDoneOutline, MdErrorOutline } from "react-icons/md";
 
 export default function Login() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL
     const navigate = useNavigate();
-    const [message, setmessage] = useState("")
     const [loading, setLoading] = useState(false)
     const { register, handleSubmit, formState: { errors }, } = useForm();
+    const [alert, setAlert] = useState(null);
+
+    useEffect(() => {
+        if (alert) {
+            const timer = setTimeout(() => {
+                setAlert(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [alert]);
 
     const onSubmit = async (formData) => {
         setLoading(true)
@@ -23,21 +33,40 @@ export default function Login() {
 
         const data = await res.json();
         console.log("Login response:", data);
-        
-        setLoading(false)
-        if (!data.success) return setmessage(data.message)
 
         if (!res.ok) {
-            throw new Error(data.message || "Login failed");
+            return setAlert({ err: "Error", message: data.message || "Signup failed" });
         }
 
+        setAlert({ success: "Success", message: data.message || "Account created successfully" });
 
-        navigate("/");
+        setTimeout(() => {
+            setLoading(false)
+            navigate("/");
+        }, 2000);
     };
 
     return (
         <>
             <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-100 w-full">
+
+
+                <div class={`fixed z-99999 flex w-3/4 h-17 overflow-hidden top-7 ${!alert && "translate-x-120"}  transition duration-300 ease-in-out right-9 bg-white shadow-lg max-w-96 rounded-xl`}>
+                    {alert && <> <svg xmlns="http://www.w3.org/2000/svg" height="96" width="16"><path stroke-linecap="round" stroke-width="2" stroke={alert.err ? "indianred" : "lightgreen"} fill={alert.err ? "indianred" : "lightgreen"} d="M 8 0 Q 4 4.8, 8 9.6 T 8 19.2 Q 4 24, 8 28.8 T 8 38.4 Q 4 43.2, 8 48 T 8 57.6 Q 4 62.4, 8 67.2 T 8 76.8 Q 4 81.6, 8 86.4 T 8 96 L 0 96 L 0 0 Z"    ></path> </svg>
+
+                        <div class="mx-2.5 overflow-hidden w-full">
+                            {alert.err && <p class="mt-1.5 text-xl flex items-center gap-2 font-bold text-[indianred] leading-8 mr-3 overflow-hidden text-ellipsis whitespace-nowrap">    {alert.err} <MdErrorOutline color="red" /></p>}
+                            {alert.success && <p class="flex items-center gap-2 mt-1.5 text-xl font-bold text-green-400 leading-8 mr-3 overflow-hidden text-ellipsis whitespace-nowrap">    {alert.success}<MdOutlineDoneOutline color="lightgreen" /></p>}
+                            <p class="overflow-hidden leading-5 break-all text-zinc-400 max-h-10">{alert.message} </p>
+                        </div>
+
+                        <button onClick={() => setAlert(null)} class="w-16 cursor-pointer focus:outline-none">
+                            <svg class="w-7 h-7" fill="none" stroke="indianred" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button></>}
+                </div>
+
+
+
                 <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 flex flex-col gap-5">
 
                     {loading && (
@@ -59,7 +88,6 @@ export default function Login() {
                                 })}
                             />
                             {errors.username && (<p className="text-xs text-red-500"> {errors.username.message}</p>)}
-                            {message && (<p className="text-xs text-red-500 text-center"> {message}</p>)}
                         </div>
 
                         <div className="flex flex-col gap-1">
