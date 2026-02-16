@@ -607,7 +607,7 @@ export default function Messages() {
                   </label>
 
                   <input id="file" type="file" hidden multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={(e) => setFiles([...e.target.files])} />
-                  <input value={message} onKeyDown={(e) => {
+                  <input value={message} autoFocus onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault(); sendMessage();
                     }
