@@ -51,26 +51,26 @@ export default function Home() {
 
             const res = await fetch(`${API_URL}/`, { method: "GET", credentials: "include", });
 
-            if (res.status === 401) {
-                navigate("/api/auth/login");
-                return;
-            }
+            if (!res.ok) return navigate("/api/auth/login");
+
 
             const data = await res.json();
             console.log("Dashboard data:", data);
 
             setAlert(null)
             setLoading(false)
+            if (data.data.length = 0 || data.data == '') return navigate("/api/auth/login");
             setsuggession(data.suggsionId)
             setPosts(data.post || []);
             setUser(data.data || '');
+
         };
 
         loadDashboard();
     }, [navigate]);
 
     const otherUser = (userId, username) => {
-        if (userId === user.Id) return navigate('/api/profile')
+        if (userId == user.Id) return navigate('/api/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
@@ -244,7 +244,7 @@ export default function Home() {
     return (
         <div className="flex flex-col sm:flex-row justify-center w-full h-[89vh] md:h-[100vh] bg-[#fafafa]">
 
-            <div class={`fixed z-9999999 flex w-3/4 h-17 overflow-hidden top-7 ${!alert && "translate-x-120"}  transition duration-300 ease-in-out right-9 bg-white shadow-lg max-w-96 rounded-xl`}>
+            <div class={`fixed z-9999999999 flex w-3/4 h-17 overflow-hidden top-7 ${!alert && "translate-x-120"}  transition duration-300 ease-in-out right-9 bg-white shadow-lg max-w-96 rounded-xl`}>
                 {alert && <> <svg xmlns="http://www.w3.org/2000/svg" height="96" width="16">    <path stroke-linecap="round" stroke-width="2" stroke={alert.err ? "indianred" : "lightgreen"} fill={alert.err ? "indianred" : "lightgreen"} d="M 8 0 Q 4 4.8, 8 9.6 T 8 19.2 Q 4 24, 8 28.8 T 8 38.4 Q 4 43.2, 8 48 T 8 57.6 Q 4 62.4, 8 67.2 T 8 76.8 Q 4 81.6, 8 86.4 T 8 96 L 0 96 L 0 0 Z"    ></path> </svg>
 
                     <div class="mx-2.5 overflow-hidden w-full">
@@ -257,7 +257,6 @@ export default function Home() {
                         <svg class="w-7 h-7" fill="none" stroke="indianred" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button></>}
             </div>
-
 
             {Loading && (
                 <div className="fixed inset-0 bg-black/40 z-9999999 flex items-center justify-center">
@@ -342,7 +341,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="hidden md:block w-[320px] ml-10">
+            <div className="hidden lg:block w-[320px] ml-10">
 
                 <div className="sticky top-20 space-y-6">
 

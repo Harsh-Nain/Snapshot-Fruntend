@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck, FiImage } from "react-icons/fi";
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
+import { MdErrorOutline, MdOutlineDoneOutline } from "react-icons/md";
 
 export default function OtherUser() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -30,12 +31,27 @@ export default function OtherUser() {
     const [commentLoading, setCommentLoading] = useState(false);
 
     const { register, handleSubmit, reset } = useForm();
+    const [alert, setAlert] = useState(null);
+
+    useEffect(() => {
+        if (alert) {
+            const timer = setTimeout(() => {
+                setAlert(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [alert]);
 
     useEffect(() => {
         if (!userId) return;
 
         const loadProfile = async () => {
+            console.log(userId, username);
+
             setPostloading(true)
+            setTimeout(() => {
+                setAlert({ message: "Please wait User data loaded...", success: "User data loaded" })
+            }, 200);
             const res = await fetch(`${API_URL}/api/auth/userProfile`, {
                 method: "POST",
                 credentials: "include",
@@ -57,6 +73,7 @@ export default function OtherUser() {
             }
 
             const result = await res.json();
+            setAlert(null)
             console.log('isFollowing', result.isfollowing);
             setPostloading(false)
 
@@ -186,12 +203,26 @@ export default function OtherUser() {
     }
 
     const otherUser = (userId, username) => {
-        if (userId === user.Id) return navigate('/api/profile')
+        if (userId == user.Id) return navigate('/api/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
     return (
         <main className="flex justify-center bg-[#fafafa] w-full min-h-screen sm:p-4">
+
+            <div class={`fixed z-9999999999 flex w-3/4 h-17 overflow-hidden top-7 ${!alert && "translate-x-120"}  transition duration-300 ease-in-out right-9 bg-white shadow-lg max-w-96 rounded-xl`}>
+                {alert && <> <svg xmlns="http://www.w3.org/2000/svg" height="96" width="16">    <path stroke-linecap="round" stroke-width="2" stroke={alert.err ? "indianred" : "lightgreen"} fill={alert.err ? "indianred" : "lightgreen"} d="M 8 0 Q 4 4.8, 8 9.6 T 8 19.2 Q 4 24, 8 28.8 T 8 38.4 Q 4 43.2, 8 48 T 8 57.6 Q 4 62.4, 8 67.2 T 8 76.8 Q 4 81.6, 8 86.4 T 8 96 L 0 96 L 0 0 Z"    ></path> </svg>
+
+                    <div class="mx-2.5 overflow-hidden w-full">
+                        {alert.err && <p class="mt-1.5 text-xl flex items-center gap-2 font-bold text-[indianred] leading-8 mr-3 overflow-hidden text-ellipsis whitespace-nowrap">    {alert.err} <MdErrorOutline color="red" /></p>}
+                        {alert.success && <p class="flex items-center gap-2 mt-1.5 text-xl font-bold text-green-400 leading-8 mr-3 overflow-hidden text-ellipsis whitespace-nowrap">    {alert.success}<MdOutlineDoneOutline color="lightgreen" /></p>}
+                        <p class="overflow-hidden leading-5 break-all text-zinc-400 max-h-10">    {alert.message} </p>
+                    </div>
+
+                    <button onClick={() => setAlert(null)} class="w-16 cursor-pointer focus:outline-none">
+                        <svg class="w-7 h-7" fill="none" stroke="indianred" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button></>}
+            </div>
 
             <div className="w-full max-w-5xl bg-white rounded-xl p-6">
 

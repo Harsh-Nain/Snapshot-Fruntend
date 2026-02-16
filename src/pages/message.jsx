@@ -6,10 +6,12 @@ import { FiSend, FiPaperclip, FiArrowLeft, FiSearch, FiMoreVertical, FiMessageCi
 import { OnTime } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import "../App.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Messages() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
+  const navigate = useNavigate()
   const [activeMsgId, setActiveMsgId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -41,16 +43,19 @@ export default function Messages() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [showChat, setShowChat] = useState(false);
   const [messloaging, setMessLoading] = useState(false);
+  const [Dltloaging, setDltLoading] = useState(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const MessContainer = useRef()
 
   const deleteMessage = async (msgId) => {
+    setDltLoading(true)
     await fetch(`${API_URL}/api/message/unSend?messid=${msgId}`, { method: "DELETE", credentials: "include", });
 
     setMessages((prev) => prev.filter((m) => m.Id !== msgId));
     setConfirmDeleteId(null);
+    setDltLoading(false)
 
     socketRef.current.emit("deleteMess", { to: openChatId, Id: msgId, message: "Message has been deleted", FromId: currentId });
   };
@@ -250,6 +255,12 @@ export default function Messages() {
     });
   };
 
+  const otherUser = (userId, username) => {
+
+    if (userId == currentId) return navigate('/api/profile')
+    navigate(`/user?username=${username}&Id=${userId}`);
+  };
+
   useEffect(() => {
 
     const searchValue = query.trim().toLowerCase();
@@ -389,7 +400,7 @@ export default function Messages() {
             <p className="font-medium mb-4"> Delete this message?</p>
             <div className="flex justify-center gap-3">
               <button onClick={() => setConfirmDeleteId(null)} className="px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300"> Cancel  </button>
-              <button onClick={() => deleteMessage(confirmDeleteId)} className="px-4 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600" >Delete </button>
+              <button onClick={() => deleteMessage(confirmDeleteId)} className="px-4 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600" >{Dltloaging ? <DotSpinner size="1rem" color="white" /> : "Delete"} </button>
             </div>
           </div>
         </div>
@@ -407,8 +418,7 @@ export default function Messages() {
           {!selectedUser ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
 
-              <div className="w-16 h-16 rounded-full bg-gray-100 
-                      flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                 <FiMessageCircle size={26} className="text-gray-400" />
               </div>
 
@@ -431,7 +441,7 @@ export default function Messages() {
                     </button>
                   )}
                   <img src={selectedUser.image_src} className="w-10 h-10 rounded-full object-cover" />
-                  <div className="flex flex-col">
+                  <div onClick={() => otherUser(selectedUser.Id, selectedUser.Username)} className="flex flex-col">
                     <p className="font-semibold">{selectedUser.Username}</p>
                     <p className="text-xs">{selectedUser.First_name}</p>
                   </div>
@@ -471,9 +481,7 @@ export default function Messages() {
                       </p>
 
                       <div className="flex justify-center gap-3">
-                        <button onClick={() => setConfirmChatDelete(null)} className="px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300">
-                          Cancel
-                        </button>
+                        <button onClick={() => setConfirmChatDelete(null)} className="px-4 py-1 rounded-lg bg-gray-200 hover:bg-gray-300">Cancel</button>
 
                         <button onClick={() => ClearChat(confirmChatDelete)} className="px-4 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600">
                           {loadDlt ? <DotSpinner size="1rem" color="white" /> : "Delete"}
@@ -494,7 +502,7 @@ export default function Messages() {
 
                       {Array.isArray(m.url) &&
                         m.url.map((file, idx) => (
-                          <div key={idx} className={`mt-2 p-1 shadow ${m.fromMe ? "bg-gradient-to-br from-sky-500 to-violet-300 rounded-2xl rounded-br-md" : "bg-gray-100 rounded-2xl rounded-bl-md"}`}>
+                          <div key={idx} className={`mt-2 p-1 shadow ${m.fromMe ? "bg-gradient-to-br overflow-hidden from-sky-500 to-violet-300 rounded-2xl rounded-br-md" : "bg-gray-100 rounded-2xl rounded-bl-md"}`}>
                             {file.type?.startsWith("image") && (
                               <img src={file.url} onClick={() => setPreviewImage(file.url)} className="rounded-xl max-w-[220px] cursor-pointer" />
                             )}
@@ -592,7 +600,7 @@ export default function Messages() {
           )}
         </div>
       )}
-      
+
     </div>
   );
 }
