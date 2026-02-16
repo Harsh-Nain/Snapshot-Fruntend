@@ -45,9 +45,7 @@ export default function Home() {
     useEffect(() => {
         const loadDashboard = async () => {
             setLoading(true)
-            setTimeout(() => {
-                setAlert({ message: "Please wait your data was loaded", success: "Data Loaded..." })
-            }, 200);
+            setTimeout(() => setAlert({ message: "Please wait your data was loaded", success: "Data Loaded..." }), 200);
 
             const res = await fetch(`${API_URL}/`, { method: "GET", credentials: "include", });
 
@@ -384,13 +382,8 @@ export default function Home() {
                                     <img src={sugUser.image_src} className="w-8 h-8 rounded-full object-cover" alt="" />
 
                                     <div>
-                                        <button onClick={() => otherUser(sugUser.Id, sugUser.Username)} className="text-sm font-semibold text-black text-left">
-                                            {sugUser.Username}
-                                        </button>
-
-                                        <p className="text-xs text-gray-500">
-                                            {sugUser.First_name}
-                                        </p>
+                                        <button onClick={() => otherUser(sugUser.Id, sugUser.Username)} className="text-sm font-semibold text-black text-left">{sugUser.Username}</button>
+                                        <p className="text-xs text-gray-500">{sugUser.First_name}</p>
                                     </div>
                                 </div>
 
@@ -401,10 +394,7 @@ export default function Home() {
                         ))}
 
                     </div>
-
-                    <p className="text-xs text-gray-400 pt-6">
-                        © 2026 SNAPSHOT FROM NAIN
-                    </p>
+                    <p className="text-xs text-gray-400 pt-6">© 2026 SNAPSHOT FROM NAIN</p>
 
                 </div>
             </div>

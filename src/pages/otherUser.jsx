@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+
 import { useForm } from "react-hook-form";
 import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck, FiImage } from "react-icons/fi";
 import { TimeAgo } from "../components/agotime";
@@ -10,9 +11,15 @@ export default function OtherUser() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL;
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const userId = searchParams.get("Id");
-    const username = searchParams.get("username");
+    const { userId, username } = useMemo(() => {
+        const params = new URLSearchParams(location.search);
+        return {
+            userId: params.get("Id"),
+            username: params.get("username")
+        };
+    }, [location.search]);
 
     const [data, setData] = useState(null);
     const [userPost, setUserPost] = useState([]);
@@ -85,7 +92,7 @@ export default function OtherUser() {
         };
 
         loadProfile();
-    }, [userId, navigate]);
+    }, [userId]);
 
     const toggleFollow = async () => {
         const path = isFollowing ? "unfollow" : "request";
@@ -204,7 +211,8 @@ export default function OtherUser() {
 
     const otherUser = (Id, username) => {
         if (Id == userId) return navigate('/api/profile')
-        navigate(`/user?username=${username}&Id=${userId}`);
+        setFollowModalOpen(false)
+        navigate(`/user?username=${username}&Id=${Id}`);
     };
 
     return (

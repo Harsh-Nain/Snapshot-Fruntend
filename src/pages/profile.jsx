@@ -76,9 +76,7 @@ export default function Profile() {
   useEffect(() => {
     const loadProfile = async () => {
       setLoading(true)
-      setTimeout(() => {
-        setAlert({ message: "Your profile data will loaded...", success: "Profile data loaded" })
-      }, 200);
+      setTimeout(() => setAlert({ message: "Your profile data will loaded...", success: "Profile data loaded" }), 200);
 
       const res = await fetch(`${API_URL}/api/profile`, {
         method: "GET",
