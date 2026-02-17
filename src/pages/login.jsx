@@ -35,6 +35,8 @@ export default function Login() {
         console.log("Login response:", data);
 
         if (!res.ok) {
+            console.log('okokkokoko');
+
             return setAlert({ err: "Error", message: data.message || "Signup failed" });
         }
 
