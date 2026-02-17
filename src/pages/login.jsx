@@ -35,12 +35,10 @@ export default function Login() {
         console.log("Login response:", data);
 
         if (!res.ok) {
-            console.log('okokkokoko');
-
-            return setAlert({ err: "Error", message: data.message || "Signup failed" });
+            return setAlert({ err: "Error", message: data.message || "Login failed" });
         }
 
-        setAlert({ success: "Success", message: data.message || "Account created successfully" });
+        setAlert({ success: "Success", message: "Login successfully" });
 
         setTimeout(() => {
             setLoading(false)
