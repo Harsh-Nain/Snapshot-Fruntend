@@ -46,8 +46,6 @@ export default function Login() {
         };
     }
 
-
-
     return (
         <>
             <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-100 w-full">
@@ -89,7 +87,7 @@ export default function Login() {
                                     minLength: { value: 3, message: "Minimum 3 characters required", },
                                 })}
                             />
-                            {errors.username && (<p className="text-xs text-red-500"> {errors.username.message}</p>)}
+                            {errors.username && (<p className="text-xs text-red-500">{errors.username.message}</p>)}
                         </div>
 
                         <div className="flex flex-col gap-1">
@@ -119,7 +117,6 @@ export default function Login() {
 
                 </div>
             </div>
-
         </>
     );
 }

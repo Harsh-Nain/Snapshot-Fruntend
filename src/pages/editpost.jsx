@@ -126,6 +126,7 @@ export default function EditPost() {
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (data.success) {
         navigate("/api/profile");
