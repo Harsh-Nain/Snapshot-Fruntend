@@ -34,17 +34,19 @@ export default function Login() {
         const data = await res.json();
         console.log("Login response:", data);
 
-        if (!res.ok) {
-            return setAlert({ err: "Error", message: data.message || "Login failed" });
-        }
-
-        setAlert({ success: "Success", message: "Login successfully" });
-
-        setTimeout(() => {
+        if (!data.success) {
             setLoading(false)
-            navigate("/");
-        }, 2000);
-    };
+            return setAlert({ err: "Error", message: data.message || "Login failed" });
+        } else {
+            setAlert({ success: "Success", message: "Login successfully" });
+            setTimeout(() => {
+                setLoading(false)
+                navigate("/");
+            }, 2000);
+        };
+    }
+
+
 
     return (
         <>
