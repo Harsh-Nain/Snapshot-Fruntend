@@ -1,44 +1,52 @@
 import { useEffect, useRef, useState } from "react";
 import { IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
 
-export function AutoPlayAudio({ src, postId, currentAudio }) {
+export function AutoPlayAudio({ src, currentAudio }) {
     const audioRef = useRef(null);
     const containerRef = useRef(null);
     const [muted, setMuted] = useState(true);
 
     useEffect(() => {
+        const audio = audioRef.current;
+        const container = containerRef.current;
+        if (!audio || !container) return;
+
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (!audioRef.current) return;
-
                 if (entry.isIntersecting) {
-                    if (
-                        currentAudio.current &&
-                        currentAudio.current !== audioRef.current
-                    ) {
+
+                    if (currentAudio.current && currentAudio.current !== audio) {
                         currentAudio.current.pause();
+                        currentAudio.current.currentTime = 0;
                     }
 
-                    audioRef.current.play().catch(() => { });
-                    currentAudio.current = audioRef.current;
+                    audio.play().catch(() => { });
+                    currentAudio.current = audio;
                 } else {
-                    audioRef.current.pause();
+                    audio.pause();
                 }
             },
-            { threshold: 0.6 }
+            { threshold: 0.7 }
         );
 
-        if (containerRef.current) {
-            observer.observe(containerRef.current);
-        }
+        observer.observe(container);
 
-        return () => observer.disconnect();
-    }, []);
+        return () => {
+            observer.disconnect();
+        };
+    }, [currentAudio]);
+
+    const toggleMute = () => {
+        if (!audioRef.current) return;
+
+        const newMuted = !muted;
+        audioRef.current.muted = newMuted;
+        setMuted(newMuted);
+    };
 
     return (
-        <div ref={containerRef} className="absolute bottom-3 right-3">
-
-            <button onClick={() => { audioRef.current.muted = !muted; setMuted(!muted); }} className="bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">
+        <div ref={containerRef} className="absolute bottom-3 right-3 z-10">
+            <button onClick={toggleMute} className="bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">
                 {muted ? <IoVolumeMute size={18} /> : <IoVolumeHigh size={18} />}
             </button>
 

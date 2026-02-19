@@ -117,21 +117,6 @@ export default function Home() {
         setPosts(prevPosts => prevPosts.map(post => post.Id === Id ? { ...post, totalLikes: data.totalLikes, isLike: data.isLike, } : post));
     };
 
-    const playSong = async (e) => {
-        const audio = e.currentTarget.querySelector('audio');
-        if (!audio) return;
-
-        document.querySelectorAll('audio').forEach(a => {
-            if (a !== audio) a.pause();
-        });
-
-        if (audio.paused) {
-            await audio.play();
-        } else {
-            audio.pause();
-        }
-    };
-
     const handleComment = async (postId, all) => {
         if (!all) {
             setCommenting(true);
@@ -310,10 +295,12 @@ export default function Home() {
                                 <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
 
                                 {post.songUrl && (
-                                    <div onClick={(e) => playSong(e, post.Id)}>
-                                        <AutoPlayAudio src={post.songUrl} postId={post.Id} currentAudio={currentAudio} />
-                                    </div>
+                                    <AutoPlayAudio
+                                        src={post.songUrl}
+                                        currentAudio={currentAudio}
+                                    />
                                 )}
+
                             </div>
 
                             <div className="px-4 pt-3 flex items-center gap-5">

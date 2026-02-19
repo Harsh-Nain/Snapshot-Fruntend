@@ -642,17 +642,13 @@ export default function Profile() {
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 z-99999999999999">
           <div className="bg-white w-full max-w-sm rounded-xl p-6 text-center shadow-lg">
             <h2 className="text-lg font-semibold mb-2">Delete Post?</h2>
-            <p className="text-sm text-gray-500 mb-6">
-              You are conferm to delete post.
-            </p>
+            <p className="text-sm text-gray-500 mb-6">You are conferm to delete post.</p>
 
             <div className="flex justify-center gap-4">
-              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-1 border rounded-md text-sm">
-                Cancel
-              </button>
+              <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-1 border rounded-md text-sm">Cancel</button>
 
               <button onClick={handleDelet} className="px-5 py-1 bg-red-500 text-white rounded-md text-sm font-semibold">
-                Delete
+                {deleteLoading ? <DotSpinner color="white" size="1rem" /> : "Delete"}
               </button>
             </div>
           </div>
