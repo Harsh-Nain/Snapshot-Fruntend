@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { TimeAgo, formatCount } from "../components/agotime";
+import { AutoPlayAudio } from "../components/autoplayaudio";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
-import { IoVolumeMute, IoVolumeHigh } from "react-icons/io5";
 import { FiMessageCircle } from "react-icons/fi";
 import { MdOutlineDoneOutline, MdErrorOutline } from "react-icons/md";
 
@@ -15,7 +15,6 @@ export default function Home() {
     const [posts, setPosts] = useState([]);
     const [user, setUser] = useState();
     const [Likeing, setLikeing] = useState(false);
-    const [isPlay, setisPlay] = useState(false);
     const [suggession, setsuggession] = useState([]);
     const [IsMessaged, setIsMessaged] = useState([]);
     const [page, setpage] = useState(2);
@@ -32,6 +31,29 @@ export default function Home() {
     const [CommentsPostId, setCommentsPostId] = useState();
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
     const [alert, setAlert] = useState(null);
+    const currentAudio = useRef(null);
+
+    const audioRef = useRef(null);
+    const postRef = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    audioRef.current?.play().catch(() => { });
+                } else {
+                    audioRef.current?.pause();
+                }
+            },
+            { threshold: 0.6 }
+        );
+
+        if (postRef.current) {
+            observer.observe(postRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         if (alert) {
@@ -50,7 +72,6 @@ export default function Home() {
             const res = await fetch(`${API_URL}/`, { method: "GET", credentials: "include", });
 
             if (!res.ok) return navigate("/auth/login");
-
 
             const data = await res.json();
             console.log("Dashboard data:", data);
@@ -96,7 +117,7 @@ export default function Home() {
         setPosts(prevPosts => prevPosts.map(post => post.Id === Id ? { ...post, totalLikes: data.totalLikes, isLike: data.isLike, } : post));
     };
 
-    const playSong = async (e, postId) => {
+    const playSong = async (e) => {
         const audio = e.currentTarget.querySelector('audio');
         if (!audio) return;
 
@@ -106,10 +127,8 @@ export default function Home() {
 
         if (audio.paused) {
             await audio.play();
-            setisPlay(postId);
         } else {
             audio.pause();
-            setisPlay(null);
         }
     };
 
@@ -287,13 +306,12 @@ export default function Home() {
                                 </button>
                             </div>
 
-                            <div className="relative w-full bg-black flex justify-center">
+                            <div ref={postRef} className="relative w-full bg-black flex justify-center">
                                 <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
 
                                 {post.songUrl && (
-                                    <button onClick={(e) => playSong(e, post.Id)} className="absolute bottom-3 right-3 bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">
-                                        {isPlay ? <IoVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
-                                        <audio src={post.songUrl}></audio>
+                                    <button onClick={(e) => playSong(e, post.Id)}>
+                                        <AutoPlayAudio src={post.songUrl} postId={post.Id} currentAudio={currentAudio} />
                                     </button>
                                 )}
                             </div>
