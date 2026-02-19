@@ -129,7 +129,7 @@ export default function EditPost() {
       console.log(data);
 
       if (data.success) {
-        navigate("/api/profile");
+        navigate("/profile");
       } else {
         setErrors({ submit: data.message });
       }
@@ -143,7 +143,7 @@ export default function EditPost() {
   return (
     <div className="w-full min-h-screen bg-[#fafafa] flex items-center justify-center sm:px-4 sm:py-10 z-9999">
 
-      <div className="absolute inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/api/profile")} size="2rem" /></div>
+      <div className="absolute inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/profile")} size="2rem" /></div>
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

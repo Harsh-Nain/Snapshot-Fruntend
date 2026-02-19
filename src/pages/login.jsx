@@ -111,7 +111,7 @@ export default function Login() {
                         <div className="flex-1 h-px bg-zinc-200" />
                     </div>
 
-                    <NavLink to="/api/auth/register" className="text-sm text-center text-zinc-600 hover:text-sky-500 transition">
+                    <NavLink to="/auth/register" className="text-sm text-center text-zinc-600 hover:text-sky-500 transition">
                         Signup & create new account
                     </NavLink>
 

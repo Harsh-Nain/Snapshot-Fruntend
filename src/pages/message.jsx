@@ -263,7 +263,7 @@ export default function Messages() {
 
   const otherUser = (userId, username) => {
 
-    if (userId == currentId) return navigate('/api/profile')
+    if (userId == currentId) return navigate('/profile')
     navigate(`/user?username=${username}&Id=${userId}`);
   };
 

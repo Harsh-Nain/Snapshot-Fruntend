@@ -74,17 +74,17 @@ export default function Navbar() {
                             <span>Search</span>
                         </button>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/post/post" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}>
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/post/post" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}>
                             <CreateOutline />
                             <span>Create</span>
                         </NavLink>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/message/message" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition   ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}                 >
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/message/mess" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition   ${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}                 >
                             <MessageOutline />
                             <span>Messages</span>
                         </NavLink>
 
-                        <NavLink onClick={() => setIsSearchOpen(false)} to="/api/profile" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}              >
+                        <NavLink onClick={() => setIsSearchOpen(false)} to="/profile" className={({ isActive }) => `flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium transition${isActive ? "font-semibold text-black" : "text-gray-700 hover:bg-gray-100"}`}              >
                             <img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full object-cover" alt="" />
                             <span>Profile</span>
                         </NavLink>
@@ -154,9 +154,9 @@ export default function Navbar() {
 
                     {[
                         { to: "/", icon: location.pathname === "/" ? <HomeFilled /> : <HomeOutline /> },
-                        { to: "/api/message/message", icon: <MessageOutline /> },
-                        { to: "/api/post/post", icon: <CreateOutline /> },
-                        { to: "/api/profile", icon: (<img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full object-cover" alt="" />) }
+                        { to: "/message/mess", icon: <MessageOutline /> },
+                        { to: "/post/post", icon: <CreateOutline /> },
+                        { to: "/profile", icon: (<img src="https://res.cloudinary.com/ddiyrbync/image/upload/v1770102978/orttx8y25exmweuqgcju.png" className="w-6 h-6 rounded-full object-cover" alt="" />) }
                     ].map((item, index) => (
                         <NavLink key={index} onClick={() => setIsSearchOpen(false)} to={item.to} className={({ isActive }) => `flex items-center justify-center p-3 transition ${isActive ? "text-black" : "text-gray-500"}`}>
                             {item.icon}

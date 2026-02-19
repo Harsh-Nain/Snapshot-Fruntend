@@ -274,7 +274,7 @@ export default function Profile() {
   };
 
   const otherUser = (userId, username) => {
-    if (userId == data.Id) return navigate('/api/profile')
+    if (userId == data.Id) return navigate('/profile')
     navigate(`/user?username=${username}&Id=${userId}`);
   };
 

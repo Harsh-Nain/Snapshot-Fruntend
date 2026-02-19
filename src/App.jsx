@@ -12,20 +12,20 @@ import EditPost from "./pages/editpost.jsx";
 
 function App() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/api/auth/register" || location.pathname === "/api/auth/login";
+  const hideNavbar = location.pathname === "/auth/register" || location.pathname === "/auth/login";
 
   return (
     <>
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/api/profile" element={<Profile />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/user" element={<OtherUser />} />
-        <Route path="/api/post/post" element={<Post />} />
+        <Route path="/post/post" element={<Post />} />
         <Route path="/post/edit" element={<EditPost />} />
-        <Route path="/api/message/message" element={<Messages />} />
-        <Route path="/api/auth/login" element={<Login />} />
-        <Route path="/api/auth/register" element={<Signup />} />
+        <Route path="/message/mess" element={<Messages />} />
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/register" element={<Signup />} />
       </Routes>
     </>
   );

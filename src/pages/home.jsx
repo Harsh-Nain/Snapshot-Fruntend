@@ -49,7 +49,7 @@ export default function Home() {
 
             const res = await fetch(`${API_URL}/`, { method: "GET", credentials: "include", });
 
-            if (!res.ok) return navigate("/api/auth/login");
+            if (!res.ok) return navigate("/auth/login");
 
 
             const data = await res.json();
@@ -57,7 +57,7 @@ export default function Home() {
 
             setAlert(null)
             setLoading(false)
-            if (data.data.length = 0 || data.data == '') return navigate("/api/auth/login");
+            if (data.data.length = 0 || data.data == '') return navigate("/auth/login");
             setsuggession(data.suggsionId)
             setPosts(data.post || []);
             setUser(data.data || '');
@@ -68,7 +68,7 @@ export default function Home() {
     }, [navigate]);
 
     const otherUser = (userId, username) => {
-        if (userId == user.Id) return navigate('/api/profile')
+        if (userId == user.Id) return navigate('/profile')
         navigate(`/user?username=${username}&Id=${userId}`);
     };
 
@@ -348,7 +348,7 @@ export default function Home() {
                             <img src={user?.image_src} className="w-12 h-12 rounded-full object-cover" alt="" />
 
                             <div>
-                                <NavLink to="/api/profile" className="font-semibold text-sm text-black">
+                                <NavLink to="/profile" className="font-semibold text-sm text-black">
                                     {user?.Username}
                                 </NavLink>
 
@@ -358,7 +358,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        <button onClick={() => navigate('/api/post/post')} className="text-sm font-semibold text-blue-500 hover:text-blue-600">
+                        <button onClick={() => navigate('/post/post')} className="text-sm font-semibold text-blue-500 hover:text-blue-600">
                             Create
                         </button>
                     </div>

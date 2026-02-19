@@ -44,7 +44,7 @@ export default function Signup() {
 
         setTimeout(() => {
             setLoading(false)
-            navigate("/api/auth/login");
+            navigate("/auth/login");
         }, 2000);
     };
 
@@ -125,7 +125,7 @@ export default function Signup() {
                     <div className="flex-1 h-px bg-zinc-200" />
                 </div>
 
-                <NavLink to="/api/auth/login" className="text-sm text-center text-zinc-600 hover:text-sky-500 transition">
+                <NavLink to="/auth/login" className="text-sm text-center text-zinc-600 hover:text-sky-500 transition">
                     Login & already have an account
                 </NavLink>
 

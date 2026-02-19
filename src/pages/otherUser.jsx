@@ -210,7 +210,7 @@ export default function OtherUser() {
     }
 
     const otherUser = (Id, username) => {
-        if (Id == userId) return navigate('/api/profile')
+        if (Id == userId) return navigate('/profile')
         setFollowModalOpen(false)
         navigate(`/user?username=${username}&Id=${Id}`);
     };
