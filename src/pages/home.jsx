@@ -310,9 +310,9 @@ export default function Home() {
                                 <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
 
                                 {post.songUrl && (
-                                    <button onClick={(e) => playSong(e, post.Id)}>
+                                    <div onClick={(e) => playSong(e, post.Id)}>
                                         <AutoPlayAudio src={post.songUrl} postId={post.Id} currentAudio={currentAudio} />
-                                    </button>
+                                    </div>
                                 )}
                             </div>
 
