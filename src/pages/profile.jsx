@@ -5,6 +5,7 @@ import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import { FiEdit, FiMessageCircle, FiMoreHorizontal, FiTrash2, FiX, FiLogOut, FiHeart, FiImage } from "react-icons/fi";
 import { MdErrorOutline, MdOutlineDoneOutline } from "react-icons/md";
+import { InstagramMedia } from "../components/videoautoplay";
 
 export default function Profile() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL
@@ -417,7 +418,11 @@ export default function Profile() {
 
           {userPost.map((post) => (
             <div key={post.Id} className="relative group cursor-pointer" onClick={() => showImage(post.Id)} style={{ aspectRatio: "1 / 1" }}>
-              <img src={post.image_url} alt="post" className="w-full bg-sky-100 h-full object-cover" />
+
+              {post.image_url.includes("video/") ? (
+                <video src={post.image_url} loop muted autoPlay playsInline className="w-full h-full object-cover bg-sky-100" />) : (
+                <img src={post.image_url} alt="post" className="w-full bg-sky-100 h-full object-cover" />
+              )}
 
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-semibold transition">
                 <FiHeart className="mr-2" />
@@ -452,8 +457,11 @@ export default function Profile() {
 
           <div className="bg-white flex flex-col md:flex-row w-full max-w-5xl h-[100vh] md:h-[85vh] sm:rounded-lg overflow-hidden relative">
 
-            <div className="w-full md:w-1/2 bg-black flex justify-center items-center h-[45vh] sm:h-full sm:max-h-[30vh] md:max-h-full">
-              <img src={Post.image_url} alt="" className="w-full h-full object-contain" />
+            <div className="w-full md:w-1/2 bg-black relative flex justify-center items-center h-[45vh] sm:h-full sm:max-h-[30vh] md:max-h-full">
+              {Post.image_url.includes("video/") ? (
+                <InstagramMedia type="video" src={Post.image_url} currentPlaying={(e) => e.target} page="profile" />) : (
+                <img src={Post.image_url} alt="post" className="w-full h-full object-contain" />
+              )}
             </div>
 
             <div className="w-full md:w-1/2 flex flex-col relative h-[50vh] sm:h-full">

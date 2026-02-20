@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { TimeAgo, formatCount } from "../components/agotime";
 import { AutoPlayAudio } from "../components/autoplayaudio";
+import { InstagramMedia } from "../components/videoautoplay";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -32,6 +33,7 @@ export default function Home() {
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
     const [alert, setAlert] = useState(null);
     const currentAudio = useRef(null);
+    const currentPlaying = useRef(null);
 
     const audioRef = useRef(null);
     const postRef = useRef(null);
@@ -278,6 +280,7 @@ export default function Home() {
                         <div key={i} className="bg-white border border-gray-200 rounded-md">
 
                             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+
                                 <button onClick={() => otherUser(post.userId, post.username)} className="flex items-center gap-3">
                                     <img src={post.image_src} alt="user" className="w-8 h-8 rounded-full object-cover border border-gray-300" />
                                     <div className="text-left">
@@ -290,25 +293,19 @@ export default function Home() {
                                     </div>
                                 </button>
                             </div>
+                            <div className="relative w-full bg-black overflow-hidden">
 
-                            <div ref={postRef} className="relative w-full bg-black flex justify-center">
-                                <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
-
-                                {post.songUrl && (
-                                    <AutoPlayAudio
-                                        src={post.songUrl}
-                                        currentAudio={currentAudio}
-                                    />
+                                {post.image_url.includes("/video/") ? (
+                                    <InstagramMedia type="video" src={post.image_url} currentPlaying={currentPlaying} />) : (
+                                    <> <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
+                                        {post.songUrl && (<AutoPlayAudio src={post.songUrl} currentAudio={currentAudio} />)}</>
                                 )}
 
                             </div>
-
                             <div className="px-4 pt-3 flex items-center gap-5">
 
                                 <button onClick={() => handleLike(post.Id)} className="transition hover:scale-110 active:scale-95" >
-                                    {Likeing ? (<DotSpinner size="1rem" color="#ef4444" />) : (
-                                        <i className={`fa-heart ${post.isLike ? "fa-solid text-red-500" : "fa-regular text-black"} text-[1.6rem]`}></i>
-                                    )}
+                                    {Likeing ? (<DotSpinner size="1rem" color="#ef4444" />) : (<i className={`fa-heart ${post.isLike ? "fa-solid text-red-500" : "fa-regular text-black"} text-[1.6rem]`}></i>)}
                                 </button>
 
                                 <button onClick={() => handleComment(post.Id)} className="text-black transition hover:scale-110 active:scale-95">
@@ -345,7 +342,6 @@ export default function Home() {
             </div>
 
             <div className="hidden lg:block w-[320px] ml-10">
-
                 <div className="sticky top-20 space-y-6">
 
                     <div className="flex items-center justify-between">
@@ -478,6 +474,5 @@ export default function Home() {
             )}
 
         </div>
-
     )
 }

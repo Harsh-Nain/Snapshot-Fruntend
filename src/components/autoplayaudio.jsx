@@ -16,7 +16,8 @@ export function AutoPlayAudio({ src, currentAudio }) {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
-                    
+
+
                     if (currentAudio.current && currentAudio.current !== audio) {
                         currentAudio.current.pause();
                         currentAudio.current.currentTime = 0;
@@ -34,7 +35,7 @@ export function AutoPlayAudio({ src, currentAudio }) {
                     audio.pause();
                 }
             },
-            { threshold: 0.8 } 
+            { threshold: 0.8 }
         );
 
         observer.observe(container);
@@ -56,11 +57,11 @@ export function AutoPlayAudio({ src, currentAudio }) {
 
     return (
         <div ref={containerRef} className="absolute bottom-3 right-3 z-10">
-            <button    onClick={toggleMute}    className="bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <button onClick={toggleMute} className="bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-sm">
                 {muted ? <IoVolumeMute size={18} /> : <IoVolumeHigh size={18} />}
             </button>
 
-            <audio    ref={audioRef}    src={src}    loop    muted    preload="auto"    playsInline/>
+            <audio ref={audioRef} src={src} loop muted preload="auto" playsInline />
         </div>
     );
 }

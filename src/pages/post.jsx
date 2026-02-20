@@ -11,13 +11,11 @@ export default function CreatePost() {
   const [dragActive, setDragActive] = useState(false);
   const [dragMusic, setDragMusic] = useState(false);
 
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [media, setMedia] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
 
   const [song, setSong] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
-
-  const [musicTab, setMusicTab] = useState("upload");
   const [openMusic, setOpenMusic] = useState(false);
 
   const [caption, setCaption] = useState("");
@@ -27,61 +25,90 @@ export default function CreatePost() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleImageFile = (file) => {
-    if (!file.type.startsWith("image/")) {
-      return setErrors({ image: "Only image files allowed" });
+  const handleMediaFile = (file) => {
+    if (!file) return;
+
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+      return setErrors({ media: "Only image or video allowed" });
     }
 
-    setImage(file);
-    setImagePreview(URL.createObjectURL(file));
-    setErrors({});
+    if (isVideo) {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+
+        if (video.duration > 60) {
+          setErrors({ media: "Video must be 1 minute or less" });
+          return;
+        }
+
+        setMedia(file);
+        setMediaPreview(URL.createObjectURL(file));
+        setErrors({});
+      };
+
+      video.src = URL.createObjectURL(file);
+    } else {
+      setMedia(file);
+      setMediaPreview(URL.createObjectURL(file));
+      setErrors({});
+    }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    handleImageFile(file);
+  const handleMediaChange = (e) => {
+    handleMediaFile(e.target.files[0]);
   };
 
-  const handleDropImage = (e) => {
+  const handleDropMedia = (e) => {
     e.preventDefault();
     setDragActive(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleImageFile(file);
+    handleMediaFile(e.dataTransfer.files[0]);
   };
 
   const handleSongFile = (file) => {
-    if (!file.type.startsWith("audio/")) return;
+    if (!file.type.startsWith("audio/")) {
+      setErrors({ music: "Only audio files allowed" });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors({ music: "Music must be under 10MB" });
+      return;
+    }
+
     const url = URL.createObjectURL(file);
     setSong(file);
     setAudioUrl(url);
     setOpenMusic(false);
+    setErrors({});
   };
 
   const handleSongChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    handleSongFile(file);
+    handleSongFile(e.target.files[0]);
   };
 
   const handleDropMusic = (e) => {
     e.preventDefault();
     setDragMusic(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleSongFile(file);
+    handleSongFile(e.dataTransfer.files[0]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!image)
-      return setErrors({ image: "Image is required" });
+    if (!media)
+      return setErrors({ media: "Image or video is required" });
 
     if (caption.length < 3)
       return setErrors({ caption: "Caption must be at least 3 characters" });
 
     const formData = new FormData();
-    formData.append("post", image);
+    formData.append("post", media);
     formData.append("postname", caption);
     formData.append("discription", description);
     formData.append("isPrivate", isPrivate);
@@ -108,15 +135,13 @@ export default function CreatePost() {
 
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      if (mediaPreview) URL.revokeObjectURL(mediaPreview);
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
-  }, [imagePreview, audioUrl]);
+  }, [mediaPreview, audioUrl]);
 
   return (
-    <div className="w-full min-h-screen bg-[#fafafa] flex justify-center sm:px-4 sm:py-10 z-9999">
-
-      <div className="fixed inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/")} size="2rem" /></div>
+    <div className="w-full min-h-screen bg-[#fafafa] flex justify-center sm:px-4 sm:py-10">
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -124,36 +149,43 @@ export default function CreatePost() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white sm:rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
-        <div onDragOver={(e) => { e.preventDefault(); setDragActive(true); }} onDragLeave={() => setDragActive(false)} onDrop={handleDropImage} className={`w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center relative transition     ${dragActive ? "border-4 border-pink-500 bg-pink-50" : ""}`}  >
-          {!imagePreview ? (
+      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
+        <div onDragOver={(e) => { e.preventDefault(); setDragActive(true); }} onDragLeave={() => setDragActive(false)} onDrop={handleDropMedia} className={`w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center relative transition ${dragActive ? "border-4 border-pink-500 bg-pink-50" : ""}`} >
+          {!mediaPreview ? (
             <div className="text-center text-gray-400">
               <FiImage size={40} className="mx-auto mb-3" />
-              <p>Drag & Drop Image Here</p>
+              <p>Drag & Drop Image or Video</p>
               <p className="text-xs mt-2">or click to upload</p>
-              {errors.image && (<p className="text-red-500 text-xs mt-2">  {errors.image}</p>)}
+              {errors.media && (
+                <p className="text-red-500 text-xs mt-2">{errors.media}</p>
+              )}
             </div>
+          ) : media?.type.startsWith("video/") ? (
+            <video src={mediaPreview} controls className="w-full h-full object-cover" />
           ) : (
-            <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />)}
+            <img src={mediaPreview} alt="preview" className="w-full h-full object-cover" />
+          )}
 
-          <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+          <input type="file" accept="image/*,video/*" onChange={handleMediaChange} className="absolute inset-0 opacity-0 cursor-pointer" />
         </div>
 
-        <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col gap-5">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent">  Create Post</h2>
-          <div className="flex flex-col">
-            <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
-            {errors.caption && (<p className="text-red-500 text-xs mt-2">  {errors.caption}</p>)}
-          </div>
+        <div className="w-full lg:w-1/2 p-6 flex flex-col gap-5">
+
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent">
+            Create Post
+          </h2>
+
+          <input type="text" placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
 
           <textarea rows={3} placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-gray-100 border focus:ring-2 focus:ring-pink-400 outline-none" />
+
           <button type="button" onClick={() => setOpenMusic(true)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-semibold">
             <FiMusic /> Add Music
           </button>
 
           {audioUrl && (
             <div className="bg-gray-100 p-4 rounded-xl">
-              <audio ref={audioRef} src={audioUrl} controls className="w-full"/>
+              <audio ref={audioRef} src={audioUrl} controls className="w-full" />
               <button type="button" onClick={() => setAudioUrl(null)} className="text-red-500 text-xs mt-2">
                 Remove Music
               </button>
@@ -166,7 +198,7 @@ export default function CreatePost() {
             Make this post private
           </label>
 
-          <button type="submit" className="py-3 rounded-full font-semibold text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 transition">
+          <button type="submit" className="py-3 rounded-full font-semibold text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
             Share Post
           </button>
         </div>
@@ -174,8 +206,7 @@ export default function CreatePost() {
 
       {openMusic && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-
-          <div onDragOver={(e) => { e.preventDefault(); setDragMusic(true); }} onDragLeave={() => setDragMusic(false)} onDrop={handleDropMusic} className={`bg-white w-full max-w-md rounded-3xl p-6 text-center transition   ${dragMusic ? "border-4 border-pink-500 bg-pink-50" : ""}`}>
+          <div onDragOver={(e) => { e.preventDefault(); setDragMusic(true); }} onDragLeave={() => setDragMusic(false)} onDrop={handleDropMusic} className={`bg-white w-full max-w-md rounded-3xl p-6 text-center transition ${dragMusic ? "border-4 border-pink-500 bg-pink-50" : ""}`}>
             <FiUpload size={30} className="mx-auto mb-3 text-pink-500" />
             <p className="font-semibold">Drag & Drop Music Here</p>
             <p className="text-sm text-gray-400 mb-4">
@@ -187,13 +218,14 @@ export default function CreatePost() {
               <input type="file" accept="audio/*" onChange={handleSongChange} className="hidden" />
             </label>
 
+            {errors.music && (<p className="text-red-500 text-xs mt-3">{errors.music}</p>)}
+
             <button onClick={() => setOpenMusic(false)} className="block mt-4 text-gray-400">
               Cancel
             </button>
           </div>
         </div>
       )}
-
     </div>
   );
 }

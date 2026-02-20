@@ -6,6 +6,7 @@ import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck, FiImage } from 
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import { MdErrorOutline, MdOutlineDoneOutline } from "react-icons/md";
+import { InstagramMedia } from "../components/videoautoplay";
 
 export default function OtherUser() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -288,7 +289,10 @@ export default function OtherUser() {
                 <div className="grid grid-cols-3 gap-1 mt-8">
                     {userPost.map(post => (
                         <div key={post.Id} onClick={() => showImage(post.Id)} className="cursor-pointer" style={{ aspectRatio: "1/1" }}>
-                            <img src={post.image_url} className="w-full bg-sky-100 h-full object-cover" />
+                            {post.image_url.includes("video/") ? (
+                                <video src={post.image_url} loop muted autoPlay playsInline className="w-full bg-sky-100 h-full object-cover" />) : (
+                                <img src={post.image_url} alt="post" className="w-full bg-sky-100 h-full object-cover" />
+                            )}
                         </div>
                     ))}
                 </div>
@@ -319,8 +323,11 @@ export default function OtherUser() {
 
                     <div className="bg-white w-full max-w-4xl flex flex-col md:flex-row h-[100vh] md:h-[85vh] rounded-lg overflow-hidden">
 
-                        <div className="md:w-1/2 bg-black flex items-center h-[40vh] sm:h-full justify-center">
-                            <img src={Post.image_url} className="bg-sky-100 object-contain max-h-full" />
+                        <div className="md:w-1/2 bg-black flex items-center h-[40vh] sm:h-full justify-center relative">
+                            {Post.image_url.includes("video/") ? (
+                                <InstagramMedia type="video" src={Post.image_url} currentPlaying={(e) => e.target} page="profile" />) : (
+                                <img src={Post.image_url} alt="post" className="w-full h-full object-contain" />
+                            )}
                         </div>
 
                         <div className="md:w-1/2 flex flex-col h-[54vh] sm:h-full">
