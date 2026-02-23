@@ -16,6 +16,7 @@ export default function EditPost() {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [isPrivate, setIsPrivate] = useState(false);
   const [media, setMedia] = useState(null);
+  const [Id, setId] = useState(null);
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -56,9 +57,10 @@ export default function EditPost() {
         });
 
         const result = await res.json();
-        if (!result?.post) return;
+        if (!result?.post) return navigate('/profile');
 
         setMediaPreview(result.post.image_url || "");
+        setId(result.post.Id)
         setMedia(result.post.image_url || "");
         setCaption(result.post.postName || "");
         setDescription(result.post.desc || "");
@@ -156,6 +158,7 @@ export default function EditPost() {
       formData.append("post", media);
     }
 
+    formData.append("id", Id);
     formData.append("postname", caption);
     formData.append("discription", description);
     formData.append("isPrivate", isPrivate);
@@ -177,7 +180,7 @@ export default function EditPost() {
 
       if (data.success) {
         console.log(data);
-        
+
         navigate("/profile");
       } else {
         setErrors({ submit: data.message });
