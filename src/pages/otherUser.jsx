@@ -6,7 +6,7 @@ import { FiHeart, FiMessageCircle, FiX, FiUserPlus, FiUserCheck, FiImage } from 
 import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import { MdErrorOutline, MdOutlineDoneOutline } from "react-icons/md";
-import { InstagramMedia } from "../components/videoautoplay";
+import { Medias } from "../components/videoautoplay";
 
 export default function OtherUser() {
     const API_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -325,7 +325,7 @@ export default function OtherUser() {
 
                         <div className="md:w-1/2 bg-black flex items-center h-[40vh] sm:h-full justify-center relative">
                             {Post.image_url.includes("video/") ? (
-                                <InstagramMedia type="video" src={Post.image_url} currentPlaying={(e) => e.target} page="profile" />) : (
+                                <Medias type="video" src={Post.image_url} currentPlaying={(e) => e.target} page="profile" />) : (
                                 <img src={Post.image_url} alt="post" className="w-full h-full object-contain" />
                             )}
                         </div>

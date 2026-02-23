@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { TimeAgo, formatCount } from "../components/agotime";
 import { AutoPlayAudio } from "../components/autoplayaudio";
-import { InstagramMedia } from "../components/videoautoplay";
+import { Medias } from "../components/videoautoplay";
 import "../App.css";
 import DotSpinner from "../components/dot-spinner-anim";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -295,8 +295,7 @@ export default function Home() {
                             </div>
                             <div className="relative w-full bg-black overflow-hidden">
 
-                                {post.image_url.includes("/video/") ? (
-                                    <InstagramMedia type="video" src={post.image_url} currentPlaying={currentPlaying} />) : (
+                                {post.image_url.includes("/video/") ? (<Medias type="video" src={post.image_url} currentPlaying={currentPlaying} />) : (
                                     <> <img src={post.image_url} alt="post" className="w-full h-auto max-h-[75vh] object-contain" />
                                         {post.songUrl && (<AutoPlayAudio src={post.songUrl} currentAudio={currentAudio} />)}</>
                                 )}
@@ -315,19 +314,11 @@ export default function Home() {
                                 </button>
                             </div>
 
-                            <div className="px-4 pt-2">
-                                <p className="text-sm font-semibold text-black">
-                                    {formatCount(post.totalLikes)} likes
-                                </p>
-                            </div>
+                            <div className="px-4 pt-2"><p className="text-sm font-semibold text-black">{formatCount(post.totalLikes)}likes</p></div>
 
                             <div className="px-4 pt-1 pb-4 text-sm">
-                                <span className="font-semibold text-black mr-2">
-                                    {post.username}
-                                </span>
-                                <span className="text-gray-700">
-                                    {post.postName}
-                                </span>
+                                <span className="font-semibold text-black mr-2">{post.username}</span>
+                                <span className="text-gray-700">{post.postName}</span>
 
                                 <p onClick={() => handleComment(post.Id, "all")} className="text-gray-500 mt-1 cursor-pointer hover:text-gray-700">
                                     View all {formatCount(post.commentCount)} comments

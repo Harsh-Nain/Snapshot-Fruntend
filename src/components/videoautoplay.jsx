@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
-import { SiSourcetree } from "react-icons/si";
 
-export function InstagramMedia({ type, src, currentPlaying, page }) {
+export function Medias({ type, src, currentPlaying, page }) {
   const mediaRef = useRef(null);
   const containerRef = useRef(null);
   const [muted, setMuted] = useState(true);

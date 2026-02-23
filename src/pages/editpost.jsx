@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiImage, FiMusic, FiLock, FiX } from "react-icons/fi";
 import DotSpinner from "../components/dot-spinner-anim";
+import { IoVolumeHigh, IoVolumeMute } from "react-icons/io5";
 
 export default function EditPost() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -28,6 +29,8 @@ export default function EditPost() {
   const username = params.get("username");
 
   const videoRef = useRef(null);
+
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -173,6 +176,8 @@ export default function EditPost() {
       const data = await res.json();
 
       if (data.success) {
+        console.log(data);
+        
         navigate("/profile");
       } else {
         setErrors({ submit: data.message });
@@ -198,14 +203,20 @@ export default function EditPost() {
 
         <div onDragOver={(e) => { e.preventDefault(); setDragActive(true); }} onDragLeave={() => setDragActive(false)} onDrop={handleDropMedia} className={`w-full lg:w-1/2 h-[40vh] sm:h-[100%] sm:aspect-square bg-zinc-900 flex items-center justify-center relative transition ${dragActive ? "border-4 border-pink-500 bg-pink-50" : ""}`}>
           {!mediaPreview ? (
-            <div className="text-center text-gray-400">
+            <div className="text-center text-gray-400 related">
               <FiImage size={40} className="mx-auto mb-3" />
               <p>Drag & Drop Image or Video</p>
               <p className="text-xs mt-2">or click to upload</p>
               {errors.media && (<p className="text-red-500 text-xs mt-2">{errors.media}</p>)}
             </div>
           ) : mediaPreview.match(/\.(mp4|webm|ogg)$/i) ? (
-            <video ref={videoRef} src={mediaPreview} muted loop playsInline className="w-full h-full object-contain" />) : (
+            <>
+              <video ref={videoRef} src={mediaPreview} muted={isMuted} loop playsInline className="w-full h-full object-contain" />
+              <button onClick={() => { videoRef.current.muted = !isMuted; setIsMuted(!isMuted); }} className="p-3 bg-black/90 z-99 right-2 bottom-2 rounded-full absolute">
+                {isMuted ? (<IoVolumeMute size={18} color="white" />) : (<IoVolumeHigh size={18} color="white" />)}
+              </button>
+            </>
+          ) : (
             <img src={mediaPreview} alt="preview" className="w-full h-full object-contain" />
           )}
 
@@ -248,9 +259,7 @@ export default function EditPost() {
             Make this post private
           </label>
 
-          {errors.submit && (
-            <p className="text-red-500 text-sm">{errors.submit}</p>
-          )}
+          {errors.submit && (<p className="text-red-500 text-sm">{errors.submit}</p>)}
 
           <button type="submit" className="py-3 rounded-full font-semibold text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 transition">
             Update Post

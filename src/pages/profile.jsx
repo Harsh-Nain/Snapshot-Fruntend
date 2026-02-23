@@ -5,7 +5,7 @@ import { TimeAgo } from "../components/agotime";
 import DotSpinner from "../components/dot-spinner-anim";
 import { FiEdit, FiMessageCircle, FiMoreHorizontal, FiTrash2, FiX, FiLogOut, FiHeart, FiImage } from "react-icons/fi";
 import { MdErrorOutline, MdOutlineDoneOutline } from "react-icons/md";
-import { InstagramMedia } from "../components/videoautoplay";
+import { Medias } from "../components/videoautoplay";
 
 export default function Profile() {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL
@@ -459,7 +459,7 @@ export default function Profile() {
 
             <div className="w-full md:w-1/2 bg-black relative flex justify-center items-center h-[45vh] sm:h-full sm:max-h-[30vh] md:max-h-full">
               {Post.image_url.includes("video/") ? (
-                <InstagramMedia type="video" src={Post.image_url} currentPlaying={(e) => e.target} page="profile" />) : (
+                <Medias type="video" src={Post.image_url} currentPlaying={(e) => e.target} page="profile" />) : (
                 <img src={Post.image_url} alt="post" className="w-full h-full object-contain" />
               )}
             </div>

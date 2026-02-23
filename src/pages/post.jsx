@@ -141,7 +141,8 @@ export default function CreatePost() {
   }, [mediaPreview, audioUrl]);
 
   return (
-    <div className="w-full min-h-screen bg-[#fafafa] flex justify-center sm:px-4 sm:py-10">
+    <div className="w-full min-h-screen bg-[#fafafa] flex justify-center sm:px-4 sm:py-10 z-999999">
+      <div className="fixed inset-0 w-[fit-content] h-[fit-content] right-0 sm:hidden z-9999999"><FiX onClick={() => navigate("/")} size="2rem" color="red" /></div>
 
       {loading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -149,7 +150,7 @@ export default function CreatePost() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
+      <form onSubmit={handleSubmit} className="w-full max-w-6xl bg-white sm:rounded-3xl shadow-xl border flex flex-col lg:flex-row overflow-hidden">
         <div onDragOver={(e) => { e.preventDefault(); setDragActive(true); }} onDragLeave={() => setDragActive(false)} onDrop={handleDropMedia} className={`w-full lg:w-1/2 aspect-square bg-gray-100 flex items-center justify-center relative transition ${dragActive ? "border-4 border-pink-500 bg-pink-50" : ""}`} >
           {!mediaPreview ? (
             <div className="text-center text-gray-400">
